@@ -1,14 +1,7 @@
-/*
-  TODOS:
-  - 
-  - 
-*/
-
 import gifAnimation.*;
 
-ArrayList <Bullet0> bullets0;//where our bullets will be stored
-ArrayList <Bullet1> bullets1;//where our bullets will be stored
-ArrayList <Bullet2> bullets2;//where our bullets will be stored
+ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
+//Bullets bullets;
 
 PImage[] P1;
 PImage[] P2;
@@ -33,9 +26,8 @@ void setup() {
   size(1280,800);
   smooth();
   frameRate(60);
-  bullets0 = new ArrayList();
-  bullets1 = new ArrayList();
-  bullets2 = new ArrayList();
+  bullets = new ArrayList();
+//  bullets = new Bullets();
   
   P1X = new float[(width-playerSize)]; // only defines length of array but not values
   P1Y = new float[(height-playerSize)]; // same as above
@@ -56,137 +48,87 @@ void setup() {
 
 void draw(){
   background(230);
-   
-  removeToLimit0(10);//some other code that removes bullets if there are too many on screen
-  moveAll0();//move all the bullets
-  displayAll0();//display all the bullets
   
-    removeToLimit1(10);//some other code that removes bullets if there are too many on screen
-  moveAll1();//move all the bullets
-  displayAll1();//display all the bullets
+//  bullets.removeToLimit(10);
+  removeToLimit(bullets, 10); //not in bullet class, 'global' specify bullets into 'removeToLimit'
   
-    removeToLimit2(10);//some other code that removes bullets if there are too many on screen
-  moveAll2();//move all the bullets
-  displayAll2();//display all the bullets
+  moveAll(bullets);
+  
+  displayAll(bullets);
   
   player1();//display player1
 }
 
 //---------------------- Bullet codes
-class Bullet0{ //bullet class
+
+class Bullet {           //bullet class to one bullet
   float x;
   float y;
   float speed;
-  Bullet0(float tx, float ty){
+  color c;
+  Bullet(float tx, float ty, int state){
     x = tx;
     y = ty;
+    if (state == 0) {
+      c = color(#ff0000);
+    } else if (state == 1) {
+      c = color(#00ff00);
+    } else if (state == 2) {
+      c = color(#0000ff);
+    } else {
+     c = color(0); 
+    }
   }
   
-void display0(){
+  //don't need to allocate to type of bullet because they share same values
+  
+void display(){
     noStroke();
-    fill(#ff0000);
-  ellipse (x, y, 50, 50);
+    fill(this.c);
+    ellipse (x, y, 50, 50);
   }
   
-  void move0(){
+  void move(){
     x += 5;
   }
-}
+}               // end of bullet class
 
-void removeToLimit0(int maxLength){ 
-  while(bullets0.size() > maxLength){
-    bullets0.remove(0);
+//class Bullets {
+//   ArrayList<Bullet> data;
+//   int maxSize = 10;
+//   Bullet() {
+//     data = new ArrayList();
+//   } 
+//   
+//   void removeToLimit(int maxLength) {
+//     while(this.data.size() > maxLength){
+//        this.data.remove(0);
+//     }
+//   }
+//}
+
+// input arrraylist<Bullet> to removeToLimit named 'arr' to parameters
+
+// instead of using the global variables(e.g. bullets0, bullets1), we take an input parameter(i.e. arr)
+// so that this function can be used with different arrays, instead of a unique function for 
+// each global array
+void removeToLimit(ArrayList<Bullet> arr, int maxLength) {
+   while(arr.size() > maxLength){
+      arr.remove(0);
   }
 }
 
-void moveAll0(){
-  for(Bullet0 temp : bullets0){
-    temp.move0();
+void moveAll(ArrayList<Bullet> arr){
+  for(Bullet temp : arr){
+    temp.move();
   }
 }
 
-void displayAll0(){
-  for(Bullet0 temp : bullets0){
-    temp.display0();
+void displayAll(ArrayList<Bullet> arr){
+  for(Bullet temp : arr){
+    temp.display();
   } 
-} // Bullet0
-
-class Bullet1{ //bullet class
-  float x;
-  float y;
-  float speed;
-  Bullet1(float tx, float ty){
-    x = tx;
-    y = ty;
-  }
-  
-void display1(){
-    noStroke();
-    fill(#00ff00);
-  ellipse (x, y, 50, 50);
-  }
-  
-  void move1(){
-    x += 5;
-  }
-}
-
-void removeToLimit1(int maxLength){ 
-  while(bullets1.size() > maxLength){
-    bullets1.remove(0);
-  }
-}
-
-void moveAll1(){
-  for(Bullet1 temp : bullets1){
-    temp.move1();
-  }
-}
-
-void displayAll1(){
-  for(Bullet1 temp : bullets1){
-    temp.display1();
-  } 
-} //Bullet1
-
-class Bullet2{ //bullet class
-  float x;
-  float y;
-  float speed;
-  Bullet2(float tx, float ty){
-    x = tx;
-    y = ty;
-  }
-  
-void display2(){
-    noStroke();
-    fill(#0000ff);
-  ellipse (x, y, 50, 50);
-  }
-  
-  void move2(){
-    x += 5;
-  }
-}
-
-void removeToLimit2(int maxLength){ 
-  while(bullets2.size() > maxLength){
-    bullets2.remove(0);
-  }
-}
-
-void moveAll2(){
-  for(Bullet2 temp : bullets2){
-    temp.move2();
-  }
-}
-
-void displayAll2(){
-  for(Bullet2 temp : bullets2){
-    temp.display2();
-  } 
-} //Bullet2
-//--------------------------- End of bullet 
+} 
 
 void player1() {
   image(P1[P1State], P1X[0], P1Y[P1Ypos], playerSize, playerSize);
@@ -213,18 +155,9 @@ void keyPressed(){
   }
   
   //keypress for bullet
-  if ((key=='x') && (P1State == 0)){
-    Bullet0 temp = new Bullet0(120,P1Ypos + playerSize/2);
-    bullets0.add(temp);
-  }
-  
-  if ((key=='x') && (P1State == 1)){
-    Bullet1 temp = new Bullet1(120,P1Ypos + playerSize/2);
-    bullets1.add(temp);
-  }
-  
-  if ((key=='x') && (P1State == 2)){
-    Bullet2 temp = new Bullet2(120,P1Ypos + playerSize/2);
-    bullets2.add(temp);
+  if (key=='x'){
+    // create bullet with state
+    Bullet temp = new Bullet(120, P1Ypos + playerSize/2, P1State);
+    bullets.add(temp);
   }
 }
