@@ -10,6 +10,7 @@ int p1Selectiony;
 int p2Selectionx;
 int p2Selectiony;
 
+
 PImage p1Choose;
 PImage p2Choose;
 
@@ -101,11 +102,20 @@ class Bullet {           //bullet class to one bullet
   float x;
   float y;
   float speed;
-  color c;
+  float direction;
+  int state;
   
-  Bullet(float tx, float ty, int state){
+  Bullet(float tx, float ty, int state, float direction){
     x = tx;
     y = ty;
+    this.state = state;
+    this.direction = direction;
+  }
+  
+  
+void display(){
+    noStroke();
+    color c;
     if (state == 1) {
       c = color(#ff0000);
     } else if (state == 2) {
@@ -115,40 +125,23 @@ class Bullet {           //bullet class to one bullet
     } else {
      c = color(0); 
     }
-  }
-  
-  //don't need to allocate to type of bullet because they share same values
-  
-void displayp1(){
-    noStroke();
-    fill(this.c);
+    
+    fill(c);
     // display player 1 bullets
-    if (p1Selection==1){
+    if (state==1){
       ellipse (x, y, 50, 50);
     }
-    if (p1Selection==2){
+    if (state==2){
       rect (x, y-25, 50, 50);
     }
-    if (p1Selection==3){
+    if (state==3){
       triangle (x, y+25, x+25, y-25, x+50, y+25);
     }
-}
-
-void displayp2(){
-    //display player 2 bullets
-    if (p2Selection==1){
-      ellipse (width-x, y, 50, 50);
-    }
-    if (p2Selection==2){
-      rect (width-x, y-25, 50, 50);
-    }
-    if (p2Selection==3){
-      triangle (width-x, y+25, width-(x+25), y-25, width-(x+50), y+25);
-    }
+        
   }
   
   void move(){
-    x += 5;
+    x += 5*direction;
   }
 }               // end of bullet class
 
@@ -166,24 +159,26 @@ void moveAll(ArrayList<Bullet> arr){
 
 void displayAll(ArrayList<Bullet> arr){
   for(Bullet temp : arr){
-    temp.displayp1();
-    temp.displayp2();
+    temp.display();
   } 
 } 
 
 void player1(){
   if (p1Selection==1){
+    fill(50);
     translate(playerSize/2, playerSize/2);
     ellipse(p1Xpos,p1Ypos,playerSize,playerSize);
-    fill(50);
+   
   }
     if (p1Selection==2){
+      fill(150);
     rect(p1Xpos, p1Ypos, playerSize, playerSize);
-    fill(150);
+    
   }
     if (p1Selection==3){
-    triangle(p1Xpos,p1Ypos+playerSize,p1Xpos+(playerSize/2),p1Ypos,p1Xpos+playerSize,p1Ypos+playerSize);
     fill(255);
+      triangle(p1Xpos,p1Ypos+playerSize,p1Xpos+(playerSize/2),p1Ypos,p1Xpos+playerSize,p1Ypos+playerSize);
+    
   }
 }
 
@@ -250,7 +245,7 @@ void keyPressed(){
     //keypress for bullet
     if (key=='d'){
       // create bullet with state
-      Bullet temp = new Bullet(playerSize, p1Ypos, p1Selection);
+      Bullet temp = new Bullet(playerSize, p1Ypos, p1Selection,1);
       bullets1.add(temp);
     } 
   }
@@ -268,7 +263,7 @@ void keyPressed(){
     //keypress for bullet
     if (key=='j'){
       // create bullet with state
-      Bullet temp = new Bullet(playerSize, p2Ypos, p2Selection);
+      Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection,-1);
       bullets2.add(temp);
     } 
   }
