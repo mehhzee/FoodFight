@@ -10,13 +10,14 @@ int p1Selectiony;
 int p2Selectionx;
 int p2Selectiony;
 
+int MAX_FPS = 60;
 
 PImage p1Choose;
 PImage p2Choose;
 
 // game components
 
-ArrayList <Bullet> bullets1, bullets2;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
+ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
 PImage[] p1;
@@ -32,65 +33,88 @@ int p1Ypos = 0;
 int p2Xpos = 1280-playerSize;
 int p2Ypos = 0;
 
+int p1Score = 0;
+int p2Score = 0;
+
+int coolDownP1 = 0;
+int coolDownP2 = 0;
+int SHOTS_PER_SECOND = 1;
+int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values will never change
 
 void setup(){
   size(1280, 800);
   smooth();
-  frameRate (60);
-
+  frameRate (MAX_FPS);
+  
   // player selection
   p1Choose = loadImage("P1Selection.v1.jpg");
-  p2Choose = loadImage("P2Selection.v1.jpg");
-
+  p2Choose = loadImage("P2Selection.v1.jpg"); 
+  
   // game
-  bullets1 = new ArrayList();
-  bullets2 = new ArrayList();
+  bullets = new ArrayList();
 
-
-  if ((p1Selected==true)&&(p2Selected==true)){
+  
+  
+  if ((p1Selected==true)&&(p2Selected==true)){ 
     // player positions
     p1X = new float[(width-playerSize)]; // only defines length of array but not values
     p1Y = new float[(height-playerSize)]; // same as above
-
+    
     for (int i = 0; i < (width-playerSize); i++) {
       p1X[i] = i;
     } // fill P1X[width] with values
-
+    
     for (int j = 0; j < (height-playerSize); j++) {
       p1Y[j] = j;
     } // fill P1Y[height] with values
-
-//    p1Xpos = 25;
-//    p1Ypos = 25;
-//    p2Xpos = width-25;
-//    p2Ypos = width-25;
+    
   }
 }
 
 void draw(){
   background(0);
   PlayerSelection();
-
+  checkCollisions(bullets);
+  
   if ((p1Selected==true)&&(p2Selected==true)){
-  //  bullets.removeToLimit(10);
-  removeToLimit(bullets1, 10);
-  removeToLimit(bullets2, 10); //not in bullet class, 'global' specify bullets into 'removeToLimit'
-  moveAll(bullets1);
-  moveAll(bullets2);
-  displayAll(bullets1);
-  displayAll(bullets2);
+
+  removeOutOfBounds(bullets);
+  moveAll(bullets);
+  displayAll(bullets);
   player1();//display player1
   player2();//display player2
-//  bullets1.display();
-//  bullets2.display();
+
+  if (coolDownP1 > 0) {
+  coolDownP1 -= 1;
   }
+  if (coolDownP2 > 0) {
+  coolDownP2 -= 1;
+  }
+  }
+}
+
+void removeOutOfBounds(ArrayList<Bullet> arr) { 
+    for (int i = 0; i < arr.size(); ) {
+      Bullet temp = arr.get(i);
+      if(temp.x < 0) {
+        arr.remove(i);
+        p2Score += 1;
+        System.out.println("Scores: P1 = " + p1Score + " - P2 = " + p2Score);
+      } else if (temp.x > width) {
+        arr.remove(i);
+        p1Score += 1;
+        System.out.println("Scores: P1 = " + p1Score + " - P2 = " + p2Score);
+      } else {
+        i++; 
+      }
+    }
 }
 
 void PlayerSelection(){
   if(p2Selected == false){
     image(p2Choose, 0, 0);
   }
-
+  
   if (p1Selected == false){
     image(p1Choose, 0, 0);
   }
@@ -104,15 +128,15 @@ class Bullet {           //bullet class to one bullet
   float speed;
   float direction;
   int state;
-
+  
   Bullet(float tx, float ty, int state, float direction){
     x = tx;
     y = ty;
     this.state = state;
     this.direction = direction;
   }
-
-
+  
+  
 void display(){
     noStroke();
     color c;
@@ -123,9 +147,9 @@ void display(){
     } else if (state == 3) {
       c = color(#0000ff);
     } else {
-     c = color(0);
+     c = color(0); 
     }
-
+    
     fill(c);
     // display player 1 bullets
     if (state==1){
@@ -137,48 +161,65 @@ void display(){
     if (state==3){
       triangle (x, y+25, x+25, y-25, x+50, y+25);
     }
-
+        
   }
-
+  
   void move(){
     x += 5*direction;
   }
+  
+  boolean collides_with(Bullet other) {
+    // ball-ball collision code from: https://github.com/jeffThompson/CollisionDetectionFunctionsForProcessing
+    // does this and other overlap?
+    // find distance between the two objects
+    float xDist = this.x-other.x;                                   // distance horiz
+    float yDist = this.y-other.y;                                   // distance vert
+    float distance = sqrt((xDist*xDist) + (yDist*yDist));  // diagonal distance
+  
+    // test for collision
+    if (playerSize/2 + playerSize/2 > distance) {
+      return true;    // if a hit, return true
+    }
+    else {            // if not, return false
+      return false;
+    }
+  }
 }               // end of bullet class
 
-void removeToLimit(ArrayList<Bullet> arr, int maxLength) {
-   while(arr.size() > maxLength){
-      arr.remove(0);
-  }
-}
 
 void moveAll(ArrayList<Bullet> arr){
-  for(Bullet temp : arr){
+  for(Bullet temp : arr){ //temporary 
     temp.move();
   }
 }
 
 void displayAll(ArrayList<Bullet> arr){
-  for(Bullet temp : arr){
+  // equivalent code
+  // for (int i = 0; i < arr.size(); i++) {
+  //  Bullet temp = arr[i];
+  //  temp.display();
+  //}
+  for(Bullet temp : arr){ //for all 
     temp.display();
-  }
-}
+  } 
+} 
 
 void player1(){
   if (p1Selection==1){
     fill(50);
     translate(playerSize/2, playerSize/2);
     ellipse(p1Xpos,p1Ypos,playerSize,playerSize);
-
+   
   }
     if (p1Selection==2){
       fill(150);
     rect(p1Xpos, p1Ypos, playerSize, playerSize);
-
+    
   }
     if (p1Selection==3){
     fill(255);
       triangle(p1Xpos,p1Ypos+playerSize,p1Xpos+(playerSize/2),p1Ypos,p1Xpos+playerSize,p1Ypos+playerSize);
-
+    
   }
 }
 
@@ -215,7 +256,7 @@ void keyPressed(){
     }
     println(p1Selection);
   }
-
+  
     if ((p1Selected == true) && (p2Selected == false)){
       if (key=='4'){
       p2Selected = true;
@@ -231,40 +272,60 @@ void keyPressed(){
     }
     println(p2Selection);
   }
-
+  
   // player1 movement & shooting
   if ((p1Selected==true)&&(p2Selected==true)){
     if ((key=='w') && (p1Ypos >= playerSize)){
       p1Ypos -=playerSize;
     }
-
+    
     if ((key=='s') && (p1Ypos < ((height-playerSize)-playerSize))){
       p1Ypos += playerSize;
     }
-
+    
     //keypress for bullet
-    if (key=='d'){
+    if ((key=='d') && (coolDownP1 == 0)) {
       // create bullet with state
+      coolDownP1 = MAXCOOLDOWN;
       Bullet temp = new Bullet(playerSize, p1Ypos, p1Selection,1);
-      bullets1.add(temp);
-    }
+      bullets.add(temp);
+    } 
   }
-
+  
    // player2 movement & shooting
   if ((p1Selected==true)&&(p2Selected==true)){
     if ((key=='i') && (p2Ypos >= playerSize)){
       p2Ypos -=playerSize;
     }
-
+    
     if ((key=='k') && (p1Ypos < ((height-playerSize)-playerSize))){
       p2Ypos += playerSize;
     }
-
+    
     //keypress for bullet
-    if (key=='j'){
+    if ((key=='j') && (coolDownP2 == 0)) {
+      coolDownP2 = MAXCOOLDOWN;
       // create bullet with state
       Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection,-1);
-      bullets2.add(temp);
-    }
+      bullets.add(temp);
+    } 
+  }
+}
+
+void checkCollisions(ArrayList<Bullet> arr) {
+  for(int i = 0; i< arr.size(); i++) {
+     for(int j = i + 1; j< arr.size(); j++) { //j is always bigger than i
+       // does arr[i] collide with arr[j] ?
+       if (arr.get(i).collides_with(arr.get(j))) {
+         System.out.println(i + " collided with " + j);
+         
+         // draw explosion particles
+         // TODO
+  
+         // remove bullets
+         arr.remove(j); // need to remove j first because it is larger than i always
+         arr.remove(i);
+       }
+     }
   }
 }
