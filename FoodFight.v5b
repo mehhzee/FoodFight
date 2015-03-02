@@ -109,15 +109,6 @@ class Bullet {           //bullet class to one bullet
     x = tx;
     y = ty;
     this.state = state;
-//    if (state == 1) {
-//      c = color(#ff0000);
-//    } else if (state == 2) {
-//      c = color(#00ff00);
-//    } else if (state == 3) {
-//      c = color(#0000ff);
-//    } else {
-//     c = color(0); 
-//    }
     this.direction = direction;
   }
   
