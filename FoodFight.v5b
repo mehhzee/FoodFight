@@ -119,7 +119,7 @@ class Bullet {           //bullet class to one bullet
   
   //don't need to allocate to type of bullet because they share same values
   
-void displayp1(){
+void display(){
     noStroke();
     fill(this.c);
     // display player 1 bullets
@@ -132,9 +132,7 @@ void displayp1(){
     if (p1Selection==3){
       triangle (x, y+25, x+25, y-25, x+50, y+25);
     }
-}
 
-void displayp2(){
     //display player 2 bullets
     if (p2Selection==1){
       ellipse (width-x, y, 50, 50);
@@ -166,8 +164,7 @@ void moveAll(ArrayList<Bullet> arr){
 
 void displayAll(ArrayList<Bullet> arr){
   for(Bullet temp : arr){
-    temp.displayp1();
-    temp.displayp2();
+    temp.display();
   } 
 } 
 
@@ -268,7 +265,7 @@ void keyPressed(){
     //keypress for bullet
     if (key=='j'){
       // create bullet with state
-      Bullet temp = new Bullet(playerSize, p2Ypos, p2Selection);
+      Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection);
       bullets2.add(temp);
     } 
   }
