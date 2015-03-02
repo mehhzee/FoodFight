@@ -33,9 +33,13 @@ int p1Ypos = 0;
 int p2Xpos = 1280-playerSize;
 int p2Ypos = 0;
 
+int p1Score = 0;
+int p2Score = 0;
+
 int coolDownP1 = 0;
 int coolDownP2 = 0;
-int MAXCOOLDOWN = MAX_FPS/2; //captials to show that values will never change
+int SHOTS_PER_SECOND = 1;
+int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values will never change
 
 void setup(){
   size(1280, 800);
@@ -64,10 +68,6 @@ void setup(){
       p1Y[j] = j;
     } // fill P1Y[height] with values
     
-//    p1Xpos = 25;
-//    p1Ypos = 25;
-//    p2Xpos = width-25;
-//    p2Ypos = width-25;
   }
 }
 
@@ -76,9 +76,9 @@ void draw(){
   PlayerSelection();
   
   if ((p1Selected==true)&&(p2Selected==true)){
-  //  bullets.removeToLimit(10);
-  removeToLimit(bullets1, 10);
-  removeToLimit(bullets2, 10); //not in bullet class, 'global' specify bullets into 'removeToLimit'
+
+  removeOutOfBounds(bullets1);
+  removeOutOfBounds(bullets2);
   moveAll(bullets1);
   moveAll(bullets2);
   displayAll(bullets1);
@@ -93,6 +93,23 @@ void draw(){
   coolDownP2 -= 1;
   }
   }
+}
+
+void removeOutOfBounds(ArrayList<Bullet> arr) { 
+    for (int i = 0; i < arr.size(); ) {
+      Bullet temp = arr.get(i);
+      if(temp.x < 0) {
+        arr.remove(i);
+        p2Score += 1;
+        System.out.println("Scores: P1 = " + p1Score + " - P2 = " + p2Score);
+      } else if (temp.x > width) {
+        arr.remove(i);
+        p1Score += 1;
+        System.out.println("Scores: P1 = " + p1Score + " - P2 = " + p2Score);
+      } else {
+        i++; 
+      }
+    }
 }
 
 void PlayerSelection(){
@@ -154,20 +171,20 @@ void display(){
   }
 }               // end of bullet class
 
-void removeToLimit(ArrayList<Bullet> arr, int maxLength) {
-   while(arr.size() > maxLength){
-      arr.remove(0);
-  }
-}
 
 void moveAll(ArrayList<Bullet> arr){
-  for(Bullet temp : arr){
+  for(Bullet temp : arr){ //temporary 
     temp.move();
   }
 }
 
 void displayAll(ArrayList<Bullet> arr){
-  for(Bullet temp : arr){
+  // equivalent code
+  // for (int i = 0; i < arr.size(); i++) {
+  //  Bullet temp = arr[i];
+  //  temp.display();
+  //}
+  for(Bullet temp : arr){ //for all 
     temp.display();
   } 
 } 
