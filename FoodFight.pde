@@ -74,6 +74,7 @@ void setup(){
 void draw(){
   background(0);
   PlayerSelection();
+  checkCollisions(bullets);
   
   if ((p1Selected==true)&&(p2Selected==true)){
 
@@ -165,6 +166,23 @@ void display(){
   
   void move(){
     x += 5*direction;
+  }
+  
+  boolean collides_with(Bullet other) {
+    // ball-ball collision code from: https://github.com/jeffThompson/CollisionDetectionFunctionsForProcessing
+    // does this and other overlap?
+    // find distance between the two objects
+    float xDist = this.x-other.x;                                   // distance horiz
+    float yDist = this.y-other.y;                                   // distance vert
+    float distance = sqrt((xDist*xDist) + (yDist*yDist));  // diagonal distance
+  
+    // test for collision
+    if (playerSize/2 + playerSize/2 > distance) {
+      return true;    // if a hit, return true
+    }
+    else {            // if not, return false
+      return false;
+    }
   }
 }               // end of bullet class
 
@@ -291,5 +309,23 @@ void keyPressed(){
       Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection,-1);
       bullets.add(temp);
     } 
+  }
+}
+
+void checkCollisions(ArrayList<Bullet> arr) {
+  for(int i = 0; i< arr.size(); i++) {
+     for(int j = i + 1; j< arr.size(); j++) { //j is always bigger than i
+       // does arr[i] collide with arr[j] ?
+       if (arr.get(i).collides_with(arr.get(j))) {
+         System.out.println(i + " collided with " + j);
+         
+         // draw explosion particles
+         // TODO
+  
+         // remove bullets
+         arr.remove(j); // need to remove j first because it is larger than i always
+         arr.remove(i);
+       }
+     }
   }
 }
