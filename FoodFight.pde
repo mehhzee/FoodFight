@@ -17,7 +17,7 @@ PImage p2Choose;
 
 // game components
 
-ArrayList <Bullet> bullets1, bullets2;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
+ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
 PImage[] p1;
@@ -51,8 +51,8 @@ void setup(){
   p2Choose = loadImage("P2Selection.v1.jpg"); 
   
   // game
-  bullets1 = new ArrayList();
-  bullets2 = new ArrayList();
+  bullets = new ArrayList();
+
   
   
   if ((p1Selected==true)&&(p2Selected==true)){ 
@@ -77,12 +77,9 @@ void draw(){
   
   if ((p1Selected==true)&&(p2Selected==true)){
 
-  removeOutOfBounds(bullets1);
-  removeOutOfBounds(bullets2);
-  moveAll(bullets1);
-  moveAll(bullets2);
-  displayAll(bullets1);
-  displayAll(bullets2);
+  removeOutOfBounds(bullets);
+  moveAll(bullets);
+  displayAll(bullets);
   player1();//display player1
   player2();//display player2
 
@@ -273,7 +270,7 @@ void keyPressed(){
       // create bullet with state
       coolDownP1 = MAXCOOLDOWN;
       Bullet temp = new Bullet(playerSize, p1Ypos, p1Selection,1);
-      bullets1.add(temp);
+      bullets.add(temp);
     } 
   }
   
@@ -292,7 +289,7 @@ void keyPressed(){
       coolDownP2 = MAXCOOLDOWN;
       // create bullet with state
       Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection,-1);
-      bullets2.add(temp);
+      bullets.add(temp);
     } 
   }
 }
