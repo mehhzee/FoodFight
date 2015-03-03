@@ -9,7 +9,6 @@ int p1Selectionx;
 int p1Selectiony;
 int p2Selectionx;
 int p2Selectiony;
-
 int MAX_FPS = 60;
 
 PImage p1Choose;
@@ -38,13 +37,14 @@ int p2Score = 0;
 
 int coolDownP1 = 0;
 int coolDownP2 = 0;
-int SHOTS_PER_SECOND = 1;
+int SHOTS_PER_SECOND = 3;
 int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values will never change
 
 void setup(){
   size(1280, 800);
   smooth();
   frameRate (MAX_FPS);
+  ellipseMode(CORNER);
   
   // player selection
   p1Choose = loadImage("P1Selection.v1.jpg");
@@ -153,22 +153,29 @@ void display(){
     fill(c);
     // display player 1 bullets
     if (state==1){
-      ellipse (x, y, 50, 50);
+      ellipse (x+25, y+25, 50, 50);
     }
     if (state==2){
-      rect (x, y-25, 50, 50);
+      rect (x+25, y+25, 50, 50);
     }
     if (state==3){
-      triangle (x, y+25, x+25, y-25, x+50, y+25);
+      triangle (x+25, y+75, x+50, y+25, x+75, y+75);
     }
         
   }
   
   void move(){
-    x += 5*direction;
+    x += 10*direction;
   }
   
   boolean collides_with(Bullet other) {
+    
+    //---- debug visual
+    stroke(#ff0000);
+    noFill();
+    ellipse(this.x, this.y, playerSize, playerSize);
+    ellipse(other.x, other.y, playerSize, playerSize);
+    
     // ball-ball collision code from: https://github.com/jeffThompson/CollisionDetectionFunctionsForProcessing
     // does this and other overlap?
     // find distance between the two objects
@@ -206,37 +213,38 @@ void displayAll(ArrayList<Bullet> arr){
 
 void player1(){
   if (p1Selection==1){
-    fill(50);
-    translate(playerSize/2, playerSize/2);
+    fill(#ff0000);
     ellipse(p1Xpos,p1Ypos,playerSize,playerSize);
    
   }
     if (p1Selection==2){
-      fill(150);
+    fill(#00ff00);
     rect(p1Xpos, p1Ypos, playerSize, playerSize);
     
   }
     if (p1Selection==3){
-    fill(255);
-      triangle(p1Xpos,p1Ypos+playerSize,p1Xpos+(playerSize/2),p1Ypos,p1Xpos+playerSize,p1Ypos+playerSize);
+    fill(#0000ff);
+    triangle(p1Xpos,p1Ypos+playerSize,p1Xpos+(playerSize/2),p1Ypos,p1Xpos+playerSize,p1Ypos+playerSize);
     
   }
 }
 
 void player2(){
   if (p2Selection==1){
-//    translate(-playerSize/2, playerSize/2);
+    fill(#ff0000);
     ellipse(p2Xpos, p2Ypos, playerSize, playerSize);
-    fill(50);
   }
-    if (p2Selection==2){
+  
+  if (p2Selection==2){
+    fill(#00ff00);
     rect(p2Xpos, p2Ypos, playerSize, playerSize);
-    fill(150);
   }
-    if (p2Selection==3){
+  
+  if (p2Selection==3){
+    fill(#0000ff);
     triangle(p2Xpos, p2Ypos+playerSize, p2Xpos+(playerSize/2),p2Ypos,p2Xpos+playerSize,p2Ypos+playerSize);
-    fill(255);
   }
+  
 }
 
 
@@ -298,7 +306,7 @@ void keyPressed(){
       p2Ypos -=playerSize;
     }
     
-    if ((key=='k') && (p1Ypos < ((height-playerSize)-playerSize))){
+    if ((key=='k') && (p2Ypos < ((height-playerSize)-playerSize))){
       p2Ypos += playerSize;
     }
     
