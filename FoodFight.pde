@@ -1,6 +1,7 @@
 // player selection
 boolean p1Selected = false;
 boolean p2Selected = false;
+boolean hit = false;
 
 int p1Selection;
 int p2Selection;
@@ -18,6 +19,8 @@ PImage p2Choose;
 
 ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
+
+ArrayList particles;
 
 PImage[] p1;
 PImage[] p2;
@@ -50,9 +53,9 @@ void setup(){
   p1Choose = loadImage("P1Selection.v1.jpg");
   p2Choose = loadImage("P2Selection.v1.jpg"); 
   
-  // game
+  // game codes
   bullets = new ArrayList();
-
+  particles = new ArrayList();
   
   
   if ((p1Selected==true)&&(p2Selected==true)){ 
@@ -78,18 +81,22 @@ void draw(){
   
   if ((p1Selected==true)&&(p2Selected==true)){
 
-  removeOutOfBounds(bullets);
-  moveAll(bullets);
-  displayAll(bullets);
-  player1();//display player1
-  player2();//display player2
+    removeOutOfBounds(bullets);
+    moveAll(bullets);
+    displayAll(bullets);
+    player1();//display player1
+    player2();//display player2
 
-  if (coolDownP1 > 0) {
-  coolDownP1 -= 1;
+    if (coolDownP1 > 0) {
+      coolDownP1 -= 1;
+    }
+    if (coolDownP2 > 0) {
+      coolDownP2 -= 1;
+    }
   }
-  if (coolDownP2 > 0) {
-  coolDownP2 -= 1;
-  }
+  
+  if (hit==true){
+    renderParticles();
   }
 }
 
@@ -328,6 +335,15 @@ void checkCollisions(ArrayList<Bullet> arr) {
          System.out.println(i + " collided with " + j);
          
          // draw explosion particles
+         hit = true;
+         
+         for (int k = 0; k < particles.size(); k++) {
+           Particle p = (Particle) particles.get(k);
+           p.run();
+           p.gravity();
+           p.display();
+         }
+         
          // TODO
   
          // remove bullets
@@ -335,5 +351,39 @@ void checkCollisions(ArrayList<Bullet> arr) {
          arr.remove(i);
        }
      }
+  }
+}
+
+void renderParticles() {
+   particles.add(new Particle());
+}
+
+class Particle {
+  
+  float x;
+  float y;
+  float xspeed;
+  float yspeed;
+  
+  Particle() {
+    x = width/2;
+    y = height/2;
+    xspeed = random(-1,1);
+    yspeed = random(-2,0);
+  }
+  
+  void run() {
+    x = x + xspeed;
+    y = y + yspeed;
+  }
+  
+  void gravity() {
+    yspeed += 0.1;
+  }
+  
+  void display() {
+    stroke(255);
+    fill(255,75);
+    ellipse(x,y,20,20);
   }
 }
