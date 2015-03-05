@@ -336,16 +336,8 @@ void checkCollisions(ArrayList<Bullet> arr) {
          
          // draw explosion particles
          hit = true;
+         particles.add(new Particle());
          
-         for (int k = 0; k < particles.size(); k++) {
-           Particle p = (Particle) particles.get(k);
-           p.run();
-           p.gravity();
-           p.display();
-         }
-         
-         // TODO
-  
          // remove bullets
          arr.remove(j); // need to remove j first because it is larger than i always
          arr.remove(i);
@@ -354,8 +346,13 @@ void checkCollisions(ArrayList<Bullet> arr) {
   }
 }
 
-void renderParticles() {
-   particles.add(new Particle());
+void renderParticles() {  //function to display particles
+  for (int k = 0; k < particles.size(); k++) {
+    Particle p = (Particle) particles.get(k);
+    p.run();
+    p.gravity();
+    p.display();
+  }
 }
 
 class Particle {
