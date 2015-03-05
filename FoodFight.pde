@@ -337,7 +337,12 @@ void checkCollisions(ArrayList<Bullet> arr) {
          
          float midpoint = ((abs(x2 - x1)/2)+ Math.min(x1,x2));
          System.out.println("x1= " + x1 + " x2= " + x2 + " midpoint = " + midpoint);
-         particles.add(new Particle(midpoint + (playerSize/2), arr.get(j).y + (playerSize/2)));
+         
+         float pX = (midpoint + (playerSize/2));
+         float pY = (arr.get(j).y + (playerSize/2));
+         for (int k = 0; k < 5; k++) {
+           particles.add(new Particle(pX, pY ));
+         }
 
          // remove bullets
          arr.remove(j); // need to remove j first because it is larger than i always
@@ -351,7 +356,7 @@ void renderParticles() {  //function to display particles
   for (int k = 0; k < particles.size(); k++) {
     Particle p = (Particle) particles.get(k);
     p.run();
-    p.gravity();
+ // p.gravity();
     p.display();
   }
 }
@@ -363,16 +368,11 @@ class Particle {
   float xspeed;
   float yspeed;
   
-  Particle() {
-    x = width/2;
-    y = height/2;
-    xspeed = random(-1,1);
-    yspeed = random(-2,0);
-  }
-  
   Particle(float x, float y) {
   this.x = x;
   this.y = y;
+  xspeed = random(-2,2);
+  yspeed = random(-2,2);
   }
   
   void run() {
