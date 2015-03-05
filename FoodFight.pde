@@ -19,6 +19,8 @@ PImage p2Choose;
 ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
+ArrayList particles;
+
 PImage[] p1;
 PImage[] p2;
 
@@ -50,9 +52,9 @@ void setup(){
   p1Choose = loadImage("P1Selection.v1.jpg");
   p2Choose = loadImage("P2Selection.v1.jpg"); 
   
-  // game
+  // game codes
   bullets = new ArrayList();
-
+  particles = new ArrayList();
   
   
   if ((p1Selected==true)&&(p2Selected==true)){ 
@@ -78,19 +80,21 @@ void draw(){
   
   if ((p1Selected==true)&&(p2Selected==true)){
 
-  removeOutOfBounds(bullets);
-  moveAll(bullets);
-  displayAll(bullets);
-  player1();//display player1
-  player2();//display player2
+    removeOutOfBounds(bullets);
+    moveAll(bullets);
+    displayAll(bullets);
+    player1();//display player1
+    player2();//display player2
 
-  if (coolDownP1 > 0) {
-  coolDownP1 -= 1;
+    if (coolDownP1 > 0) {
+      coolDownP1 -= 1;
+    }
+    if (coolDownP2 > 0) {
+      coolDownP2 -= 1;
+    }
   }
-  if (coolDownP2 > 0) {
-  coolDownP2 -= 1;
-  }
-  }
+  
+    renderParticles();
 }
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
@@ -328,12 +332,61 @@ void checkCollisions(ArrayList<Bullet> arr) {
          System.out.println(i + " collided with " + j);
          
          // draw explosion particles
-         // TODO
-  
+         float x1 = arr.get(i).x;
+         float x2 = arr.get(j).x;
+         
+         float midpoint = ((abs(x2 - x1)/2)+ Math.min(x1,x2));
+         System.out.println("x1= " + x1 + " x2= " + x2 + " midpoint = " + midpoint);
+         
+         float pX = (midpoint + (playerSize/2));
+         float pY = (arr.get(j).y + (playerSize/2));
+         for (int k = 0; k < 5; k++) {
+           particles.add(new Particle(pX, pY ));
+         }
+
          // remove bullets
          arr.remove(j); // need to remove j first because it is larger than i always
          arr.remove(i);
        }
      }
+  }
+}
+
+void renderParticles() {  //function to display particles
+  for (int k = 0; k < particles.size(); k++) {
+    Particle p = (Particle) particles.get(k);
+    p.run();
+ // p.gravity();
+    p.display();
+  }
+}
+
+class Particle {
+  
+  float x;
+  float y;
+  float xspeed;
+  float yspeed;
+  
+  Particle(float x, float y) {
+  this.x = x;
+  this.y = y;
+  xspeed = random(-2,2);
+  yspeed = random(-2,2);
+  }
+  
+  void run() {
+    x = x + xspeed;
+    y = y + yspeed;
+  }
+  
+  void gravity() {
+    yspeed += 0.1;
+  }
+  
+  void display() {
+    stroke(255);
+    fill(255,75);
+    ellipse(x,y,20,20);
   }
 }
