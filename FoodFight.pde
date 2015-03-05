@@ -1,7 +1,6 @@
 // player selection
 boolean p1Selected = false;
 boolean p2Selected = false;
-boolean hit = false;
 
 int p1Selection;
 int p2Selection;
@@ -95,9 +94,7 @@ void draw(){
     }
   }
   
-  if (hit==true){
     renderParticles();
-  }
 }
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
@@ -335,9 +332,13 @@ void checkCollisions(ArrayList<Bullet> arr) {
          System.out.println(i + " collided with " + j);
          
          // draw explosion particles
-         hit = true;
-         particles.add(new Particle());
+         float x1 = arr.get(i).x;
+         float x2 = arr.get(j).x;
          
+         float midpoint = ((abs(x2 - x1)/2)+ Math.min(x1,x2));
+         System.out.println("x1= " + x1 + " x2= " + x2 + " midpoint = " + midpoint);
+         particles.add(new Particle(midpoint + (playerSize/2), arr.get(j).y + (playerSize/2)));
+
          // remove bullets
          arr.remove(j); // need to remove j first because it is larger than i always
          arr.remove(i);
@@ -367,6 +368,11 @@ class Particle {
     y = height/2;
     xspeed = random(-1,1);
     yspeed = random(-2,0);
+  }
+  
+  Particle(float x, float y) {
+  this.x = x;
+  this.y = y;
   }
   
   void run() {
