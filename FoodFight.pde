@@ -19,10 +19,12 @@ PImage p2Choose;
 ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
-ArrayList particles;
+ArrayList p1particles;
+ArrayList p2particles;
 
 PImage[] p1;
 PImage[] p2;
+PImage end;
 
 int playerSize = 100;
 
@@ -42,8 +44,13 @@ int coolDownP2 = 0;
 int SHOTS_PER_SECOND = 3;
 int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values will never change
 
+// save final art
+float transparency = 255;
+PImage artwork = createImage(1280, 800, RGB);
+
+
 void setup() {
-  size(1280, 800);
+  size(1280, 800, P3D);
   smooth();
   frameRate (MAX_FPS);
   ellipseMode(CORNER);
@@ -51,10 +58,13 @@ void setup() {
   // player selection
   p1Choose = loadImage("P1Selection.v1.jpg");
   p2Choose = loadImage("P2Selection.v1.jpg"); 
+  end = loadImage("EndOfGame.png");
 
   // game codes
   bullets = new ArrayList();
-  particles = new ArrayList();
+  p1particles = new ArrayList();
+  p2particles = new ArrayList();
+
 
 
   if ((p1Selected==true)&&(p2Selected==true)) { 
@@ -78,14 +88,17 @@ void draw() {
   checkCollisions(bullets);
 
   if ((p1Selected==true)&&(p2Selected==true)) {
+    if ((p1Score < 5) && (p2Score < 5)) {
+      player1();//display player1
+      player2();//display player2
+    }
 
     removeOutOfBounds(bullets);
     moveAll(bullets);
     displayAll(bullets);
-    player1();//display player1
-    player2();//display player2
 
-      if (coolDownP1 > 0) {
+
+    if (coolDownP1 > 0) {
       coolDownP1 -= 1;
     }
     if (coolDownP2 > 0) {
@@ -94,6 +107,10 @@ void draw() {
   }
 
   renderParticles();
+
+  //  if (savescreen == true) {
+  savescreen();
+  //  }
 }
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
@@ -279,7 +296,7 @@ void keyPressed() {
   }
 
   // player1 movement & shooting
-  if ((p1Selected==true)&&(p2Selected==true)) {
+  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<5)&&(p2Score<5)) {
     if ((key=='w') && (p1Ypos >= playerSize)) {
       p1Ypos -=playerSize;
     }
@@ -298,7 +315,7 @@ void keyPressed() {
   }
 
   // player2 movement & shooting
-  if ((p1Selected==true)&&(p2Selected==true)) {
+  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<5)&&(p2Score<5)) {
     if ((key=='i') && (p2Ypos >= playerSize)) {
       p2Ypos -=playerSize;
     }
@@ -314,6 +331,30 @@ void keyPressed() {
       Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection, -1);
       bullets.add(temp);
     }
+  }
+
+  if ((key=='p') && ((p1Score >= 5) || (p2Score >=5))) {
+    transparency = 0;
+    loadPixels();
+    artwork.loadPixels();
+    for (int i = 0; i < width; i++) {
+      for (int j = 0; j < height; j++) {
+        artwork.pixels[j]=pixels[j];
+      }
+      artwork.pixels[i]=pixels[i];
+    }
+    artwork.updatePixels();
+    updatePixels();
+    image(artwork, 0, 0);
+    save("artwork.jpg");
+    transparency = 255;
+  }
+}//<--- void keyPressed()
+
+void savescreen() { 
+  if ((p1Score >=5) || (p2Score >=5)) {
+    tint(255, transparency);
+    image(end, 0, 0);
   }
 }
 
@@ -333,9 +374,9 @@ void checkCollisions(ArrayList<Bullet> arr) {
 
         float pX = (midpoint + (playerSize/2));
         float pY = (arr.get(j).y + (playerSize/2));
-
         for (int k = 0; k < 5; k++) {
-          particles.add(new Particle(pX, pY));
+          p1particles.add(new Particle(pX, pY, p1Selection));
+          p2particles.add(new Particle(pX, pY, p2Selection));
         }
 
         // remove bullets
@@ -347,11 +388,22 @@ void checkCollisions(ArrayList<Bullet> arr) {
 }
 
 void renderParticles() {  //function to display particles
-  for (int k = 0; k < particles.size (); k++) {
-    Particle p = (Particle) particles.get(k);
-    p.run();
-    // p.gravity();
-    p.display();
+  for (int k = 0; k < p1particles.size (); k++) {
+    //    if (int(random(0, 2))==0) {
+    //      Particle p1 = (CrazyParticle) p1particles.get(k);
+    //      Particle p2 = (CrazyParticle) p2particles.get(k);
+    //    } else {
+    Particle p1 = (Particle) p1particles.get(k);
+    Particle p2 = (Particle) p2particles.get(k);
+    //    }
+
+    p1.run();
+    p1.gravity();
+    p1.display();
+
+    p2.run();
+    p2.gravity();
+    p2.display();
   }
 }
 
@@ -361,40 +413,90 @@ class Particle {
   float y;
   float xspeed;
   float yspeed;
-  float life = MAX_FPS * 10 ;
-  //  float pX;
-  //  float pY;
+  int state;
+  float life = 50;
 
-  Particle(float x, float y) {
+  Particle(float x, float y, int state) {
     this.x = x;
     this.y = y;
+    this.state = state;
     xspeed = random(-3, 3);
     yspeed = random(-3, 3);
   }
 
   void run() {
-    if (life >0) { //to make particles stop moving
-      life -= 1;
-
-      if (x > width || x < 0) { //to bounce of walls
-        xspeed*= -1;
-      }
-      if (y > height || y < 0) {
-        yspeed*= -1;
-      }
-
-      x = x + xspeed;
-      y = y + yspeed;
-    }
+    //  if (life > 0) {
+    //    life -= 1;
+    x = x + xspeed;
+    y = y + yspeed;
+    //    }
   }
 
   void gravity() {
-    yspeed += 0.1;
+    if (yspeed > 0) {
+      yspeed -= 0.025;
+    }
+
+    if (yspeed < 0) {
+      yspeed += 0.025;
+    }
+
+    if (xspeed > 0) {
+      xspeed -= 0.025;
+    }
+
+    if (xspeed < 0) {
+      xspeed += 0.025;
+    }
   }
 
   void display() {
-    stroke(255);
-    fill(255, 75);
-    ellipse(x, y, 20, 20);
+    noStroke();
+    color c;
+    if (state == 1) {
+      c = color(#ff0000);
+    } else if (state == 2) {
+      c = color(#00ff00);
+    } else if (state == 3) {
+      c = color(#0000ff);
+    } else {
+      c = color(0);
+    }
+
+    fill(c);
+    // display player 1 bullets
+    if (state==1) {
+      ellipse(x, y, 20, 20);
+    }
+    if (state==2) {
+      rect (x, y, 20, 20);
+    }
+    if (state==3) {
+      triangle (x-10, y+10, x, y-10, x+10, y+10);
+    }
   }
-}
+} // <--- end of class Particle
+
+//class CrazyParticle extends Particle {
+//  PVector location;
+//
+//  CrazyParticle(PVector l) {
+//    super(l);
+//    theta = 0.0;
+//  }
+//
+//  void update() {
+//    super.update();
+//    float theta_vel = (velocity.x * velocity.mag())/10.0f;
+//    theta += theta_vel;
+//  }
+//
+//  void display() {
+//    super.display();
+//    pushMatrix();
+//    rotate(theta);
+//    stroke(255);
+//    line(0, 0, 25, 0);
+//    popMatrix();
+//  }
+//}
