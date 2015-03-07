@@ -1,3 +1,4 @@
+// Bens version
 // player selection
 boolean p1Selected = false;
 boolean p2Selected = false;
@@ -19,19 +20,26 @@ PImage p2Choose;
 ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
-ArrayList particles;
+ArrayList p1particles;
+ArrayList p2particles;
 
 PImage[] p1;
 PImage[] p2;
+PImage end;
 
-int playerSize = 100;
+PShape burger;
+PShape soda;
+
+
+int playerWidth = 120;
+int playerHeight = 120;
 
 float[] p1X;
 float[] p1Y;
 
 int p1Xpos = 0;
 int p1Ypos = 0;
-int p2Xpos = 1280-playerSize;
+int p2Xpos = 1280-playerWidth;
 int p2Ypos = 0;
 
 int p1Score = 0;
@@ -42,50 +50,66 @@ int coolDownP2 = 0;
 int SHOTS_PER_SECOND = 3;
 int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values will never change
 
+// save final art
+float transparency = 255;
+PImage artwork;
+
+
 void setup() {
-  size(1280, 800);
+  size(1280, 800, P3D);
   smooth();
   frameRate (MAX_FPS);
-  ellipseMode(CORNER);
+  //  //  ellipseMode(CORNER);
 
   // player selection
   p1Choose = loadImage("P1Selection.v1.jpg");
   p2Choose = loadImage("P2Selection.v1.jpg"); 
 
+  burger = loadShape("SmashMash_Burger_Icon.svg");
+  soda = loadShape("SmashMash_Soda_Icon.svg");
+
+
+  end = loadImage("EndOfGame.png");
+
   // game codes
   bullets = new ArrayList();
-  particles = new ArrayList();
+  p1particles = new ArrayList();
+  p2particles = new ArrayList();
+
 
 
   if ((p1Selected==true)&&(p2Selected==true)) { 
     // player positions
-    p1X = new float[(width-playerSize)]; // only defines length of array but not values
-    p1Y = new float[(height-playerSize)]; // same as above
+    p1X = new float[(width-playerWidth)]; // only defines length of array but not values
+    p1Y = new float[(height-playerHeight)]; // same as above
 
-    for (int i = 0; i < (width-playerSize); i++) {
+    for (int i = 0; i < (width-playerWidth); i++) {
       p1X[i] = i;
     } // fill P1X[width] with values
 
-    for (int j = 0; j < (height-playerSize); j++) {
+    for (int j = 0; j < (height-playerHeight); j++) {
       p1Y[j] = j;
     } // fill P1Y[height] with values
   }
 }
 
 void draw() {
-  background(0);
+  background(#003958);
   PlayerSelection();
   checkCollisions(bullets);
 
   if ((p1Selected==true)&&(p2Selected==true)) {
+    if ((p1Score < 5) && (p2Score < 5)) {
+      player1();//display player1
+      player2();//display player2
+    }
 
     removeOutOfBounds(bullets);
     moveAll(bullets);
     displayAll(bullets);
-    player1();//display player1
-    player2();//display player2
 
-      if (coolDownP1 > 0) {
+
+    if (coolDownP1 > 0) {
       coolDownP1 -= 1;
     }
     if (coolDownP2 > 0) {
@@ -94,6 +118,10 @@ void draw() {
   }
 
   renderParticles();
+
+  //  if (savescreen == true) {
+  savescreen();
+  //  }
 }
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
@@ -153,13 +181,13 @@ class Bullet {           //bullet class to one bullet
       c = color(0);
     }
 
-    fill(c);
+    //    fill(c);
     // display player 1 bullets
     if (state==1) {
-      ellipse (x+25, y+25, 50, 50);
+      shape (burger, x, y, playerWidth, (playerHeight*0.81));
     }
     if (state==2) {
-      rect (x+25, y+25, 50, 50);
+      shape(soda, x, y+20, (playerWidth*0.68), (playerHeight*1.1));
     }
     if (state==3) {
       triangle (x+25, y+75, x+50, y+25, x+75, y+75);
@@ -175,8 +203,8 @@ class Bullet {           //bullet class to one bullet
     //---- debug visual
     stroke(#ff0000);
     noFill();
-    ellipse(this.x, this.y, playerSize, playerSize);
-    ellipse(other.x, other.y, playerSize, playerSize);
+    ellipse(this.x, this.y, playerHeight, playerHeight);
+    ellipse(other.x, other.y, playerHeight, playerHeight);
 
     // ball-ball collision code from: https://github.com/jeffThompson/CollisionDetectionFunctionsForProcessing
     // does this and other overlap?
@@ -186,7 +214,7 @@ class Bullet {           //bullet class to one bullet
     float distance = sqrt((xDist*xDist) + (yDist*yDist));  // diagonal distance
 
     // test for collision
-    if (playerSize/2 + playerSize/2 > distance) {
+    if (playerWidth/2 + playerWidth/2 > distance) {
       return true;    // if a hit, return true
     } else {            // if not, return false
       return false;
@@ -214,33 +242,37 @@ void displayAll(ArrayList<Bullet> arr) {
 
 void player1() {
   if (p1Selection==1) {
-    fill(#ff0000);
-    ellipse(p1Xpos, p1Ypos, playerSize, playerSize);
+    shape(burger, p1Xpos, p1Ypos, (playerWidth), (playerHeight*0.81));
   }
   if (p1Selection==2) {
-    fill(#00ff00);
-    rect(p1Xpos, p1Ypos, playerSize, playerSize);
+    translate(0, 20);
+    shape(soda, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
   }
   if (p1Selection==3) {
     fill(#0000ff);
-    triangle(p1Xpos, p1Ypos+playerSize, p1Xpos+(playerSize/2), p1Ypos, p1Xpos+playerSize, p1Ypos+playerSize);
+    triangle(p1Xpos, p1Ypos+playerWidth, p1Xpos+(playerWidth/2), p1Ypos, p1Xpos+playerWidth, p1Ypos+playerWidth);
   }
 }
 
 void player2() {
   if (p2Selection==1) {
-    fill(#ff0000);
-    ellipse(p2Xpos, p2Ypos, playerSize, playerSize);
+    pushMatrix();
+    scale (-1.0, 1.0);
+    shape(burger, -(p2Xpos + playerWidth), p2Ypos, (playerWidth), (playerHeight*0.81));
+    popMatrix();
   }
 
   if (p2Selection==2) {
-    fill(#00ff00);
-    rect(p2Xpos, p2Ypos, playerSize, playerSize);
+    pushMatrix();
+    translate(0, 20);
+    scale (-1.0, 1.0);
+    shape (soda, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
+    popMatrix();
   }
 
   if (p2Selection==3) {
     fill(#0000ff);
-    triangle(p2Xpos, p2Ypos+playerSize, p2Xpos+(playerSize/2), p2Ypos, p2Xpos+playerSize, p2Ypos+playerSize);
+    triangle(p2Xpos, p2Ypos+playerWidth, p2Xpos+(playerWidth/2), p2Ypos, p2Xpos+playerWidth, p2Ypos+playerWidth);
   }
 }
 
@@ -279,41 +311,71 @@ void keyPressed() {
   }
 
   // player1 movement & shooting
-  if ((p1Selected==true)&&(p2Selected==true)) {
-    if ((key=='w') && (p1Ypos >= playerSize)) {
-      p1Ypos -=playerSize;
+  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<5)&&(p2Score<5)) {
+    if ((key=='w') && (p1Ypos >= playerHeight)) {
+      p1Ypos -=playerHeight;
     }
 
-    if ((key=='s') && (p1Ypos < ((height-playerSize)-playerSize))) {
-      p1Ypos += playerSize;
+    if ((key=='s') && (p1Ypos < ((height-playerHeight)-playerHeight))) {
+      p1Ypos += playerHeight;
     }
 
     //keypress for bullet
     if ((key=='d') && (coolDownP1 == 0)) {
       // create bullet with state
       coolDownP1 = MAXCOOLDOWN;
-      Bullet temp = new Bullet(playerSize, p1Ypos, p1Selection, 1);
+      Bullet temp = new Bullet(playerWidth, p1Ypos, p1Selection, 1);
       bullets.add(temp);
     }
   }
 
   // player2 movement & shooting
-  if ((p1Selected==true)&&(p2Selected==true)) {
-    if ((key=='i') && (p2Ypos >= playerSize)) {
-      p2Ypos -=playerSize;
+  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<5)&&(p2Score<5)) {
+    if ((key=='i') && (p2Ypos >= playerHeight)) {
+      p2Ypos -=playerHeight;
     }
 
-    if ((key=='k') && (p2Ypos < ((height-playerSize)-playerSize))) {
-      p2Ypos += playerSize;
+    if ((key=='k') && (p2Ypos < ((height-playerHeight)-playerHeight))) {
+      p2Ypos += playerHeight;
     }
 
     //keypress for bullet
     if ((key=='j') && (coolDownP2 == 0)) {
       coolDownP2 = MAXCOOLDOWN;
       // create bullet with state
-      Bullet temp = new Bullet(width-playerSize, p2Ypos, p2Selection, -1);
+      pushMatrix();
+      scale(-1.0, 1.0);
+      Bullet temp = new Bullet(-(-width + playerWidth), p2Ypos, p2Selection, -1);
       bullets.add(temp);
+      popMatrix();
     }
+  }
+
+  if ((key=='p') && ((p1Score >= 5) || (p2Score >=5))) {
+
+    if (artwork != null) {
+      artwork.save("artwork.jpg");
+    }
+    println("saved");
+  }
+}//<--- void keyPressed()
+
+void savescreen() { 
+  if ((p1Score >=5) || (p2Score >=5)) {
+    artwork = createImage(width, height, RGB);
+
+    loadPixels();
+    artwork.loadPixels();
+
+    for (int i = 0; i < artwork.pixels.length; i++) {
+      artwork.pixels[i] = pixels[i];
+    }
+
+    artwork.updatePixels();
+    updatePixels();
+
+    tint(255, transparency);
+    image(end, 0, 0);
   }
 }
 
@@ -331,11 +393,11 @@ void checkCollisions(ArrayList<Bullet> arr) {
         float midpoint = ((abs(x2 - x1)/2)+ Math.min(x1, x2));
         System.out.println("x1= " + x1 + " x2= " + x2 + " midpoint = " + midpoint);
 
-        float pX = (midpoint + (playerSize/2));
-        float pY = (arr.get(j).y + (playerSize/2));
-
+        float pX = (midpoint + (playerWidth/2));
+        float pY = (arr.get(j).y + (playerHeight/2));
         for (int k = 0; k < 5; k++) {
-          particles.add(new Particle(pX, pY));
+          p1particles.add(new Particle(pX, pY, p1Selection));
+          p2particles.add(new Particle(pX, pY, p2Selection));
         }
 
         // remove bullets
@@ -347,11 +409,22 @@ void checkCollisions(ArrayList<Bullet> arr) {
 }
 
 void renderParticles() {  //function to display particles
-  for (int k = 0; k < particles.size (); k++) {
-    Particle p = (Particle) particles.get(k);
-    p.run();
-    // p.gravity();
-    p.display();
+  for (int k = 0; k < p1particles.size (); k++) {
+    //    if (int(random(0, 2))==0) {
+    //      Particle p1 = (CrazyParticle) p1particles.get(k);
+    //      Particle p2 = (CrazyParticle) p2particles.get(k);
+    //    } else {
+    Particle p1 = (Particle) p1particles.get(k);
+    Particle p2 = (Particle) p2particles.get(k);
+    //    }
+
+    p1.run();
+    p1.gravity();
+    p1.display();
+
+    p2.run();
+    p2.gravity();
+    p2.display();
   }
 }
 
@@ -361,40 +434,90 @@ class Particle {
   float y;
   float xspeed;
   float yspeed;
-  float life = MAX_FPS * 10 ;
-  //  float pX;
-  //  float pY;
+  int state;
+  float life = 50;
 
-  Particle(float x, float y) {
+  Particle(float x, float y, int state) {
     this.x = x;
     this.y = y;
-    xspeed = random(-3, 3);
-    yspeed = random(-3, 3);
+    this.state = state;
+    xspeed = random(-5, 5);
+    yspeed = random(-5, 5);
   }
 
   void run() {
-    if (life >0) { //to make particles stop moving
-      life -= 1;
-
-      if (x > width || x < 0) { //to bounce of walls
-        xspeed*= -1;
-      }
-      if (y > height || y < 0) {
-        yspeed*= -1;
-      }
-
-      x = x + xspeed;
-      y = y + yspeed;
-    }
+    //  if (life > 0) {
+    //    life -= 1;
+    x = x + xspeed;
+    y = y + yspeed;
+    //    }
   }
 
   void gravity() {
-    yspeed += 0.1;
+    if (yspeed > 0) {
+      yspeed -= 0.05;
+    }
+
+    if (yspeed < 0) {
+      yspeed += 0.05;
+    }
+
+    if (xspeed > 0) {
+      xspeed -= 0.05;
+    }
+
+    if (xspeed < 0) {
+      xspeed += 0.05;
+    }
   }
 
   void display() {
-    stroke(255);
-    fill(255, 75);
-    ellipse(x, y, 20, 20);
+    noStroke();
+    color c;
+    if (state == 1) {
+      c = color(#ff0000);
+    } else if (state == 2) {
+      c = color(#00ff00);
+    } else if (state == 3) {
+      c = color(#0000ff);
+    } else {
+      c = color(0);
+    }
+
+    fill(c);
+    // display player 1 bullets
+    if (state==1) {
+      ellipse(x, y, 20, 20);
+    }
+    if (state==2) {
+      rect (x, y, 20, 20);
+    }
+    if (state==3) {
+      triangle (x-10, y+10, x, y-10, x+10, y+10);
+    }
   }
-}
+} // <--- end of class Particle
+
+//class CrazyParticle extends Particle {
+//  PVector location;
+//
+//  CrazyParticle(PVector l) {
+//    super(l);
+//    theta = 0.0;
+//  }
+//
+//  void update() {
+//    super.update();
+//    float theta_vel = (velocity.x * velocity.mag())/10.0f;
+//    theta += theta_vel;
+//  }
+//
+//  void display() {
+//    super.display();
+//    pushMatrix();
+//    rotate(theta);
+//    stroke(255);
+//    line(0, 0, 25, 0);
+//    popMatrix();
+//  }
+//}
