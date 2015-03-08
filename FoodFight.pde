@@ -57,10 +57,10 @@ int playerHeight = 120;
 float[] p1X;
 float[] p1Y;
 
-int p1Xpos = 0;
-int p1Ypos = 0;
-int p2Xpos = 1280-playerWidth;
-int p2Ypos = 0;
+int p1Xpos;
+int p1Ypos;
+int p2Xpos;
+int p2Ypos; 
 
 int p1Score = 0;
 int p2Score = 0;
@@ -135,6 +135,8 @@ void setup() {
       p1Y[j] = j;
     } // fill P1Y[height] with values
   }
+
+  restart();
 }
 
 void draw() {
@@ -206,6 +208,10 @@ void PlayerSelection() {
 }
 
 void restart() {
+  p1Xpos = playerWidth / 2;
+  p1Ypos = height / 2;
+  p2Xpos = width - (playerWidth + playerWidth / 2);
+  p2Ypos = height / 2;
   p1Selected = false;
   p2Selected = false;
   p1Score = 0;
@@ -236,37 +242,22 @@ class Bullet {           //bullet class to one bullet
     noStroke();
 
     pushMatrix();
+    translate(x, y);
+    if (direction < 0) {
+      scale(-1, 1);
+    }
     if (state==1) {
-
-      translate(x, y);
-      if (direction < 0) {
-        translate(playerWidth, 0);
-        scale(-1, 1);
-      }
-
       shape (burger, 0, 0, playerWidth, (playerHeight*0.81));
     }
-
     if (state==2) {
-      translate(x, y+20);
-      if (direction < 0) {
-        translate(playerWidth, 0);
-        scale(-1, 1);
-      }
-
       shape(soda, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
     if (state==3) {
-      translate(x, y+20);
-      if (direction < 0) {
-        translate(playerWidth, 0);
-        scale(-1, 1);
-      }
-
       shape(icecream, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
     popMatrix();
   }
+
 
   void move() {
     x += 10*direction;
@@ -320,11 +311,9 @@ void player1() {
     shape(burger, p1Xpos, p1Ypos, (playerWidth), (playerHeight*0.81));
   }
   if (p1Selection==2) {
-    translate(0, 20);
     shape(soda, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
   }
   if (p1Selection==3) {
-    translate(0, 20);
     shape(icecream, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
   }
 }
@@ -339,7 +328,6 @@ void player2() {
 
   if (p2Selection==2) {
     pushMatrix();
-    translate(0, 20);
     scale (-1.0, 1.0);
     shape (soda, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
     popMatrix();
@@ -347,7 +335,6 @@ void player2() {
 
   if (p2Selection==3) {
     pushMatrix();
-    translate(0, 20);
     scale (-1.0, 1.0);
     shape (icecream, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
     popMatrix();
@@ -396,14 +383,14 @@ void keyPressed() {
 
   // player1 movement & shooting
   if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<win)&&(p2Score<win)) {
-    if ((key=='w') && (p1Ypos >= playerHeight)) {
-      p1Ypos -=playerHeight;
+    if (key=='w') {
+      p1Ypos -= playerHeight;
     }
 
-    if ((key=='s') && (p1Ypos < ((height-playerHeight)-playerHeight))) {
+    if ((key=='s') && (p1Ypos < (height-playerHeight))) {
       p1Ypos += playerHeight;
     }
-
+    p1Ypos = constrain(p1Ypos, playerHeight, height-playerHeight);
     //keypress for bullet
     if ((key=='d') && (coolDownP1 == 0)) {
       // create bullet with state
@@ -415,13 +402,14 @@ void keyPressed() {
 
   // player2 movement & shooting
   if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<win)&&(p2Score<win)) {
-    if ((key=='i') && (p2Ypos >= playerHeight)) {
+    if (key=='i')  {
       p2Ypos -=playerHeight;
     }
 
-    if ((key=='k') && (p2Ypos < ((height-playerHeight)-playerHeight))) {
+    if (key=='k')  {
       p2Ypos += playerHeight;
     }
+    p2Ypos = constrain(p2Ypos, playerHeight, height-playerHeight);
 
     //keypress for bullet
     if ((key=='j') && (coolDownP2 == 0)) {
@@ -522,11 +510,11 @@ class Particle {
       life -= 1;
       x = x + xspeed;
       y = y + yspeed;
-      if (DEBUG) {
-        stroke(random(255), random(255), random(255));
-        noFill();
-        ellipse(this.x, this.y, particleSize, particleSize);
-      }
+//      if (DEBUG) {
+//        stroke(random(255), random(255), random(255));
+//        noFill();
+//        ellipse(this.x, this.y, particleSize, particleSize);
+//      }
       if (x > width - particleSize/2 || x < particleSize/2) { //to bounce of walls
         xspeed*= -1;
       }
