@@ -61,6 +61,9 @@ int p2Ypos = 0;
 int p1Score = 0;
 int p2Score = 0;
 
+int p1ParticleVariation;
+int p2ParticleVariation;
+
 int coolDownP1 = 0;
 int coolDownP2 = 0;
 int SHOTS_PER_SECOND = 3;
@@ -101,7 +104,7 @@ void setup() {
   // You first access it by the 'state' of the particle : bullet->(burger, or drink or icecream)
   // THEN you access that by its 'variation' which would be the different particle images for each type of bullet.
   particleShapes[1] = new PShape[] { 
-    burger_tomato, burger_bacon, icecream_cherry
+    burger_tomato, burger_bacon
   };
   particleShapes[2] = new PShape[] { 
     icecream_cherry
@@ -389,6 +392,12 @@ void keyPressed() {
       p2Selection = 3;
     }
     println(p2Selection);
+    
+    if (p2Selected) {
+      // Now that all the players have chosen their bullet type, we can choose their variation randomly
+      p1ParticleVariation = int(random(0, particleShapes[p1Selection].length));
+      p2ParticleVariation = int(random(0, particleShapes[p2Selection].length));
+    }
   }
 
   // player1 movement & shooting
@@ -529,7 +538,12 @@ class Particle {
     this.state = state;
     xspeed = random(-5, 5);
     yspeed = random(-5, 5);
-    this.variation = int(random(0, particleShapes[state].length));
+    
+    if (direction > 0) {
+      this.variation = p1ParticleVariation;
+    } else {
+      this.variation = p2ParticleVariation;
+    }
     this.direction = direction;
   }
 
@@ -566,7 +580,7 @@ class Particle {
 //  }
 
   void display() {
-    noStroke();
+    noStroke();   
     shape(particleShapes[state][variation], x, y, 50, 50);
   }
 } // <--- end of class Particle
