@@ -33,7 +33,6 @@ ArrayList <Bullet> bullets;
 
 ArrayList <Particle> particles;
 
-
 PImage[] p1;
 PImage[] p2;
 PImage end;
@@ -67,6 +66,7 @@ int p2Score = 0;
 
 int p1ParticleVariation;
 int p2ParticleVariation;
+int particlesPerCollision = 3;
 
 int coolDownP1 = 0;
 int coolDownP2 = 0;
@@ -402,11 +402,11 @@ void keyPressed() {
 
   // player2 movement & shooting
   if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<win)&&(p2Score<win)) {
-    if (key=='i')  {
+    if (key=='i') {
       p2Ypos -=playerHeight;
     }
 
-    if (key=='k')  {
+    if (key=='k') {
       p2Ypos += playerHeight;
     }
     p2Ypos = constrain(p2Ypos, playerHeight, height-playerHeight);
@@ -462,7 +462,7 @@ void checkCollisions(ArrayList<Bullet> arr) {
 
         float pX = (midpoint + (playerWidth/2));
         float pY = (arr.get(j).y + (playerHeight/2));
-        for (int k = 0; k < 5; k++) {
+        for (int k = 0; k < particlesPerCollision; k++) {
           particles.add(new Particle(pX, pY, p1Selection, 1));
           particles.add(new Particle(pX, pY, p2Selection, -1));
         }
@@ -510,11 +510,11 @@ class Particle {
       life -= 1;
       x = x + xspeed;
       y = y + yspeed;
-//      if (DEBUG) {
-//        stroke(random(255), random(255), random(255));
-//        noFill();
-//        ellipse(this.x, this.y, particleSize, particleSize);
-//      }
+      //      if (DEBUG) {
+      //        stroke(random(255), random(255), random(255));
+      //        noFill();
+      //        ellipse(this.x, this.y, particleSize, particleSize);
+      //      }
       if (x > width - particleSize/2 || x < particleSize/2) { //to bounce of walls
         xspeed*= -1;
       }
@@ -526,8 +526,13 @@ class Particle {
 
   void display() {
     noStroke();   
+    pushMatrix();
+    translate(x,y);
+    float a = atan2(yspeed, xspeed);
+    rotate(a);
     PShape s = particleShapes[state][variation];
     float scaleWidth = s.width * (particleSize/s.height);
-    shape(s, x, y, scaleWidth, particleSize);
+    shape(s, 0, 0, scaleWidth, particleSize);
+    popMatrix();
   }
 } // <--- end of class Particle
