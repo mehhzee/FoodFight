@@ -7,7 +7,9 @@ boolean gameEnd = false;
 boolean p1Selected = false;
 boolean p2Selected = false;
 
-int win = 5;
+boolean saveScreen = false;
+
+int win = 1;
 
 int p1Selection;
 int p2Selection;
@@ -19,7 +21,7 @@ int p2Selectiony;
 int MAX_FPS = 60;
 
 PImage p1Choose;
-PImage p2Choose;
+PImage p2Choose; 
 
 // game components
 
@@ -27,8 +29,8 @@ ArrayList <Bullet> bullets;
 //where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
-ArrayList p1particles;
-ArrayList p2particles;
+ArrayList <Particle> particles;
+
 
 PImage[] p1;
 PImage[] p2;
@@ -116,10 +118,7 @@ void setup() {
 
   // game codes
   bullets = new ArrayList();
-  p1particles = new ArrayList();
-  p2particles = new ArrayList();
-
-
+  particles = new ArrayList();
 
   if ((p1Selected==true)&&(p2Selected==true)) { 
     // player positions
@@ -137,8 +136,12 @@ void setup() {
 }
 
 void draw() {
-  fill(#35495E, 127);
-  rect(0, 0, width, height);
+  if (saveScreen) {
+    background(#35495E);
+  } else {
+    fill(#35495E, 127);
+    rect(0, 0, width, height);
+  }
 
   PlayerSelection();
   checkCollisions(bullets);
@@ -163,8 +166,14 @@ void draw() {
   }
 
   renderParticles();
+  if (saveScreen) {
+    savescreen();
+    saveScreen = false;
+  }
 
-  savescreen();
+  if ((p1Score >= win) || (p2Score >= win)) {
+    image(end, 0, 0);
+  }
 }
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
@@ -200,8 +209,7 @@ void restart() {
   p1Score = 0;
   p2Score = 0;
   bullets.clear();
-  p1particles.clear();
-  p2particles.clear();
+  particles.clear();
 }
 
 
@@ -384,7 +392,7 @@ void keyPressed() {
   }
 
   // player1 movement & shooting
-  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<5)&&(p2Score<5)) {
+  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<win)&&(p2Score<win)) {
     if ((key=='w') && (p1Ypos >= playerHeight)) {
       p1Ypos -=playerHeight;
     }
@@ -403,7 +411,7 @@ void keyPressed() {
   }
 
   // player2 movement & shooting
-  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<5)&&(p2Score<5)) {
+  if ((p1Selected==true)&&(p2Selected==true)&&(p1Score<win)&&(p2Score<win)) {
     if ((key=='i') && (p2Ypos >= playerHeight)) {
       p2Ypos -=playerHeight;
     }
@@ -422,11 +430,7 @@ void keyPressed() {
   }
 
   if ((key=='p') && ((p1Score >= win) || (p2Score >=win))) {
-
-    if (artwork != null) {
-      artwork.save("artwork.png");
-    }
-    println("saved");
+    saveScreen = true;
   }
 
   if ((key == 'r') && ((p1Score >=win) || (p2Score >=win))) {
@@ -435,22 +439,21 @@ void keyPressed() {
 }//<--- void keyPressed()
 
 void savescreen() { 
-  if ((p1Score >=5) || (p2Score >=5)) {
-    artwork = createImage(width, height, RGB);
+  artwork = createImage(width, height, RGB);
+  loadPixels();
+  artwork.loadPixels();
 
-    loadPixels();
-    artwork.loadPixels();
-
-    for (int i = 0; i < artwork.pixels.length; i++) {
-      artwork.pixels[i] = pixels[i];
-    }
-
-    artwork.updatePixels();
-    updatePixels();
-
-    image(end, 0, 0);
+  for (int i = 0; i < artwork.pixels.length; i++) {
+    artwork.pixels[i] = pixels[i];
   }
+
+  artwork.updatePixels();
+  updatePixels();
+
+  artwork.save("artwork.png");
+  println("saved");
 }
+
 
 void checkCollisions(ArrayList<Bullet> arr) {
   for (int i = 0; i< arr.size (); i++) {
@@ -469,8 +472,8 @@ void checkCollisions(ArrayList<Bullet> arr) {
         float pX = (midpoint + (playerWidth/2));
         float pY = (arr.get(j).y + (playerHeight/2));
         for (int k = 0; k < 5; k++) {
-          p1particles.add(new Particle(pX, pY, p1Selection, 1));
-          p2particles.add(new Particle(pX, pY, p2Selection, -1));
+          particles.add(new Particle(pX, pY, p1Selection, 1));
+          particles.add(new Particle(pX, pY, p2Selection, -1));
         }
 
         // remove bullets
@@ -481,17 +484,10 @@ void checkCollisions(ArrayList<Bullet> arr) {
   }
 }
 
-void renderParticles() {  //function to display particles
-  for (int k = 0; k < p1particles.size (); k++) {
-
-    Particle p1 = (Particle) p1particles.get(k);
-    Particle p2 = (Particle) p2particles.get(k);
-
-    p1.run();
-    p1.display();
-
-    p2.run();
-    p2.display();
+void renderParticles() {  //function to display and update particles
+ for (Particle p : particles) {
+    p.run();
+    p.display();
   }
 }
 
