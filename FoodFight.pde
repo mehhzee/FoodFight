@@ -11,7 +11,7 @@ boolean saveScreen = false;
 boolean DEBUG = true;
 
 int win = 1;
-int particleSize = 30;
+int particleSize = 40;
 
 int p1Selection;
 int p2Selection;
@@ -275,7 +275,7 @@ class Bullet {           //bullet class to one bullet
   boolean collides_with(Bullet other) {
     //---- debug visual
     if (DEBUG) {
-      stroke(#ff0000);
+      stroke(random(255), random(255), random(255));
       noFill();
       ellipse(this.x, this.y, playerHeight, playerHeight);
       ellipse(other.x, other.y, playerHeight, playerHeight);
@@ -514,12 +514,7 @@ class Particle {
     xspeed = random(-5, 5);
     yspeed = random(-5, 5);
 
-    if (direction > 0) {
-      this.variation = p1ParticleVariation;
-    } else {
-      this.variation = p2ParticleVariation;
-    }
-    this.direction = direction;
+    this.variation = int(random(0, particleShapes[state].length));
   }
 
   void run() {
@@ -528,7 +523,7 @@ class Particle {
       x = x + xspeed;
       y = y + yspeed;
       if (DEBUG) {
-        stroke(#ff0000);
+        stroke(random(255), random(255), random(255));
         noFill();
         ellipse(this.x, this.y, particleSize, particleSize);
       }
