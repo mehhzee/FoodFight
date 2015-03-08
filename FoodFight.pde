@@ -8,8 +8,10 @@ boolean p1Selected = false;
 boolean p2Selected = false;
 
 boolean saveScreen = false;
+boolean DEBUG = true;
 
 int win = 1;
+int particleSize = 30;
 
 int p1Selection;
 int p2Selection;
@@ -21,7 +23,7 @@ int p2Selectiony;
 int MAX_FPS = 60;
 
 PImage p1Choose;
-PImage p2Choose; 
+PImage p2Choose;
 
 // game components
 
@@ -271,12 +273,13 @@ class Bullet {           //bullet class to one bullet
   }
 
   boolean collides_with(Bullet other) {
-
     //---- debug visual
-    stroke(#ff0000);
-    noFill();
-    ellipse(this.x, this.y, playerHeight, playerHeight);
-    ellipse(other.x, other.y, playerHeight, playerHeight);
+    if (DEBUG) {
+      stroke(#ff0000);
+      noFill();
+      ellipse(this.x, this.y, playerHeight, playerHeight);
+      ellipse(other.x, other.y, playerHeight, playerHeight);
+    }
 
     // ball-ball collision code from: https://github.com/jeffThompson/CollisionDetectionFunctionsForProcessing
     // does this and other overlap?
@@ -485,7 +488,7 @@ void checkCollisions(ArrayList<Bullet> arr) {
 }
 
 void renderParticles() {  //function to display and update particles
- for (Particle p : particles) {
+  for (Particle p : particles) {
     p.run();
     p.display();
   }
@@ -524,6 +527,12 @@ class Particle {
       life -= 1;
       x = x + xspeed;
       y = y + yspeed;
+      if (DEBUG) {
+        stroke(#ff0000);
+        noFill();
+        ellipse(this.x, this.y, particleSize, particleSize);
+//        ellipse(other.x, other.y, playerHeight, playerHeight);
+      }
       if (x > width || x < 0) { //to bounce of walls
         xspeed*= -1;
       }
@@ -535,6 +544,6 @@ class Particle {
 
   void display() {
     noStroke();   
-    shape(particleShapes[state][variation], x, y, 50, 50);
+    shape(particleShapes[state][variation], x, y, particleSize, particleSize);
   }
 } // <--- end of class Particle
