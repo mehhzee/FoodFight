@@ -1,7 +1,13 @@
-// Bens version
-// player selection
+boolean gameTitle = false;
+boolean gameSelect = false;
+boolean gameInstruction = false;
+boolean gameStart = false;
+boolean gameEnd = false;
+
 boolean p1Selected = false;
 boolean p2Selected = false;
+
+int win = 5;
 
 int p1Selection;
 int p2Selection;
@@ -17,7 +23,8 @@ PImage p2Choose;
 
 // game components
 
-ArrayList <Bullet> bullets;//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
+ArrayList <Bullet> bullets;
+//where our bullets will be stored Bullet (with the capital 'B' = class) & bullets = all the bullets 0,1,2..9,10.. the states
 //Bullets bullets;
 
 ArrayList p1particles;
@@ -27,12 +34,18 @@ PImage[] p1;
 PImage[] p2;
 PImage end;
 
+PShape[][] particleShapes; 
+//[bullet int][particles variations]
+
 PShape burger;
 PShape burger_tomato;
 PShape burger_bacon;
 
 PShape soda;
 
+PShape icecream;
+PShape icecream_pocky;
+PShape icecream_cherry;
 
 int playerWidth = 120;
 int playerHeight = 120;
@@ -60,23 +73,44 @@ PImage artwork;
 
 void setup() {
   size(1280, 800, P3D);
-  smooth();
+  smooth(8);
   frameRate (MAX_FPS);
-  //  //  ellipseMode(CORNER);
 
   // player selection
   p1Choose = loadImage("P1Selection.v1.jpg");
   p2Choose = loadImage("P2Selection.v1.jpg"); 
 
+  // Size needs to always be one bigger than the amount of bullet types because
+  // state starts at 1 instead of 0
+  particleShapes = new PShape[4][];
+
   burger = loadShape("SmashMash_Burger_Icon.svg");
   burger_tomato = loadShape("Burger_Tomato.svg");
   burger_bacon = loadShape("Burger_Bacon.svg");
 
-
   soda = loadShape("SmashMash_Soda_Icon.svg");
 
+  icecream = loadShape("SmashMash_IceCream_Icon.svg");  
+  icecream_cherry = loadShape("Icecream_Cherry.svg");
+  icecream_pocky = loadShape("Icecream_Pocky.svg");
 
   end = loadImage("EndOfGame.png");
+
+
+  // Setup the particle shapes, it is double layered (2 dimensional)
+  // You first access it by the 'state' of the particle : bullet->(burger, or drink or icecream)
+  // THEN you access that by its 'variation' which would be the different particle images for each type of bullet.
+  particleShapes[1] = new PShape[] { 
+    burger_tomato, burger_bacon, icecream_cherry
+  };
+  particleShapes[2] = new PShape[] { 
+    icecream_cherry
+  };
+  particleShapes[3] = new PShape[] { 
+    icecream_pocky, 
+    icecream_cherry
+  };
+
 
   // game codes
   bullets = new ArrayList();
@@ -101,12 +135,14 @@ void setup() {
 }
 
 void draw() {
-  background(#003958);
+  fill(#35495E, 127);
+  rect(0, 0, width, height);
+  
   PlayerSelection();
   checkCollisions(bullets);
 
   if ((p1Selected==true)&&(p2Selected==true)) {
-    if ((p1Score < 5) && (p2Score < 5)) {
+    if ((p1Score < win) && (p2Score < win)) {
       player1();//display player1
       player2();//display player2
     }
@@ -158,6 +194,18 @@ void PlayerSelection() {
   }
 }
 
+void restart() {
+    p1Selected = false;
+    p2Selected = false;
+    p1Score = 0;
+    p2Score = 0;
+    bullets.clear();
+    p1particles.clear();
+    p2particles.clear();
+
+}
+
+
 //---------------------- Bullet codes
 
 class Bullet {           //bullet class to one bullet
@@ -178,15 +226,15 @@ class Bullet {           //bullet class to one bullet
   void display() {
     noStroke();
     color c;
-    if (state == 1) {
-      c = color(#ff0000);
-    } else if (state == 2) {
-      c = color(#00ff00);
-    } else if (state == 3) {
-      c = color(#0000ff);
-    } else {
-      c = color(0);
-    }
+    //    if (state == 1) {
+    //      c = color(#ff0000);
+    //    } else if (state == 2) {
+    //      c = color(#00ff00);
+    //    } else if (state == 3) {
+    //      c = color(#0000ff);
+    //    } else {
+    //      c = color(0);
+    //    }
 
     pushMatrix();
     //    fill(c);
@@ -201,6 +249,7 @@ class Bullet {           //bullet class to one bullet
 
       shape (burger, 0, 0, playerWidth, (playerHeight*0.81));
     }
+
     if (state==2) {
       translate(x, y+20);
       if (direction < 0) {
@@ -211,7 +260,14 @@ class Bullet {           //bullet class to one bullet
       shape(soda, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
     if (state==3) {
-      triangle (x+25, y+75, x+50, y+25, x+75, y+75);
+      //      triangle (x+25, y+75, x+50, y+25, x+75, y+75);
+      translate(x, y+20);
+      if (direction < 0) {
+        translate(playerWidth, 0);
+        scale(-1, 1);
+      }
+
+      shape(icecream, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
     popMatrix();
   }
@@ -271,8 +327,8 @@ void player1() {
     shape(soda, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
   }
   if (p1Selection==3) {
-    fill(#0000ff);
-    triangle(p1Xpos, p1Ypos+playerWidth, p1Xpos+(playerWidth/2), p1Ypos, p1Xpos+playerWidth, p1Ypos+playerWidth);
+    translate(0, 20);
+    shape(icecream, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
   }
 }
 
@@ -293,8 +349,11 @@ void player2() {
   }
 
   if (p2Selection==3) {
-    fill(#0000ff);
-    triangle(p2Xpos, p2Ypos+playerWidth, p2Xpos+(playerWidth/2), p2Ypos, p2Xpos+playerWidth, p2Ypos+playerWidth);
+    pushMatrix();
+    translate(0, 20);
+    scale (-1.0, 1.0);
+    shape (icecream, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
+    popMatrix();
   }
 }
 
@@ -370,12 +429,16 @@ void keyPressed() {
     }
   }
 
-  if ((key=='p') && ((p1Score >= 5) || (p2Score >=5))) {
+  if ((key=='p') && ((p1Score >= win) || (p2Score >=win))) {
 
     if (artwork != null) {
-      artwork.save("artwork.jpg");
+      artwork.save("artwork.png");
     }
     println("saved");
+  }
+
+  if ((key == 'r') && ((p1Score >=win) || (p2Score >=win))) {
+    restart();    
   }
 }//<--- void keyPressed()
 
@@ -393,7 +456,7 @@ void savescreen() {
     artwork.updatePixels();
     updatePixels();
 
-    tint(255, transparency);
+    //    tint(255, transparency);
     image(end, 0, 0);
   }
 }
@@ -414,9 +477,9 @@ void checkCollisions(ArrayList<Bullet> arr) {
 
         float pX = (midpoint + (playerWidth/2));
         float pY = (arr.get(j).y + (playerHeight/2));
-        for (int k = 0; k < 1; k++) {
-          p1particles.add(new Particle(pX, pY, p1Selection));
-          p2particles.add(new Particle(pX, pY, p2Selection));
+        for (int k = 0; k < 5; k++) {
+          p1particles.add(new Particle(pX, pY, p1Selection, 1));
+          p2particles.add(new Particle(pX, pY, p2Selection, -1));
         }
 
         // remove bullets
@@ -438,14 +501,16 @@ void renderParticles() {  //function to display particles
     //    }
 
     p1.run();
-    p1.gravity();
+//    p1.gravity();
     p1.display();
 
     p2.run();
-    p2.gravity();
+//    p2.gravity();
     p2.display();
   }
 }
+
+//<--- Start ofParticle class
 
 class Particle {
 
@@ -454,66 +519,54 @@ class Particle {
   float xspeed;
   float yspeed;
   int state;
-  float life = 50;
+  int variation;
+  float life = MAX_FPS * 10 ;
+  float direction;
 
-  Particle(float x, float y, int state) {
+  Particle(float x, float y, int state, int direction) {
     this.x = x;
     this.y = y;
     this.state = state;
     xspeed = random(-5, 5);
     yspeed = random(-5, 5);
+    this.variation = int(random(0, particleShapes[state].length));
+    this.direction = direction;
   }
 
   void run() {
-    //  if (life > 0) {
-    //    life -= 1;
+      if (life > 0) {
+        life -= 1;
     x = x + xspeed;
     y = y + yspeed;
-    //    }
-  }
-
-  void gravity() {
-    if (yspeed > 0) {
-      yspeed -= 0.05;
+    if (x > width || x < 0) { //to bounce of walls
+      xspeed*= -1;
     }
-
-    if (yspeed < 0) {
-      yspeed += 0.05;
-    }
-
-    if (xspeed > 0) {
-      xspeed -= 0.05;
-    }
-
-    if (xspeed < 0) {
-      xspeed += 0.05;
+    if (y > height || y < 0) {
+      yspeed*= -1;
     }
   }
+  }
+//
+//  void gravity() {
+//    if (yspeed > 0) {
+//      yspeed -= 0.05;
+//    }
+//
+//    if (yspeed < 0) {
+//      yspeed += 0.05;
+//    }
+//
+//    if (xspeed > 0) {
+//      xspeed -= 0.05;
+//    }
+//
+//    if (xspeed < 0) {
+//      xspeed += 0.05;
+//    }
+//  }
 
   void display() {
     noStroke();
-    color c;
-    if (state == 1) {
-      c = color(#ff0000);
-    } else if (state == 2) {
-      c = color(#00ff00);
-    } else if (state == 3) {
-      c = color(#0000ff);
-    } else {
-      c = color(0);
-    }
-
-    //    fill(c);
-    if (state==1) {
-      shape(burger_tomato, x, y, 50, 50);
-      shape(burger_bacon, x, y, 50, 50);
-      //      ellipse(x, y, 20, 20);
-    }
-    if (state==2) {
-      rect (x, y, 20, 20);
-    }
-    if (state==3) {
-      triangle (x-10, y+10, x, y-10, x+10, y+10);
-    }
+    shape(particleShapes[state][variation], x, y, 50, 50);
   }
 } // <--- end of class Particle
