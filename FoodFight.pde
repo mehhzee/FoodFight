@@ -70,7 +70,6 @@ int SHOTS_PER_SECOND = 3;
 int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values will never change
 
 // save final art
-float transparency = 255;
 PImage artwork;
 
 
@@ -140,7 +139,7 @@ void setup() {
 void draw() {
   fill(#35495E, 127);
   rect(0, 0, width, height);
-  
+
   PlayerSelection();
   checkCollisions(bullets);
 
@@ -165,9 +164,7 @@ void draw() {
 
   renderParticles();
 
-  //  if (savescreen == true) {
   savescreen();
-  //  }
 }
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
@@ -198,14 +195,13 @@ void PlayerSelection() {
 }
 
 void restart() {
-    p1Selected = false;
-    p2Selected = false;
-    p1Score = 0;
-    p2Score = 0;
-    bullets.clear();
-    p1particles.clear();
-    p2particles.clear();
-
+  p1Selected = false;
+  p2Selected = false;
+  p1Score = 0;
+  p2Score = 0;
+  bullets.clear();
+  p1particles.clear();
+  p2particles.clear();
 }
 
 
@@ -228,20 +224,8 @@ class Bullet {           //bullet class to one bullet
 
   void display() {
     noStroke();
-    color c;
-    //    if (state == 1) {
-    //      c = color(#ff0000);
-    //    } else if (state == 2) {
-    //      c = color(#00ff00);
-    //    } else if (state == 3) {
-    //      c = color(#0000ff);
-    //    } else {
-    //      c = color(0);
-    //    }
 
     pushMatrix();
-    //    fill(c);
-    // display player 1 bullets
     if (state==1) {
 
       translate(x, y);
@@ -263,7 +247,6 @@ class Bullet {           //bullet class to one bullet
       shape(soda, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
     if (state==3) {
-      //      triangle (x+25, y+75, x+50, y+25, x+75, y+75);
       translate(x, y+20);
       if (direction < 0) {
         translate(playerWidth, 0);
@@ -392,7 +375,7 @@ void keyPressed() {
       p2Selection = 3;
     }
     println(p2Selection);
-    
+
     if (p2Selected) {
       // Now that all the players have chosen their bullet type, we can choose their variation randomly
       p1ParticleVariation = int(random(0, particleShapes[p1Selection].length));
@@ -447,7 +430,7 @@ void keyPressed() {
   }
 
   if ((key == 'r') && ((p1Score >=win) || (p2Score >=win))) {
-    restart();    
+    restart();
   }
 }//<--- void keyPressed()
 
@@ -465,7 +448,6 @@ void savescreen() {
     artwork.updatePixels();
     updatePixels();
 
-    //    tint(255, transparency);
     image(end, 0, 0);
   }
 }
@@ -501,20 +483,14 @@ void checkCollisions(ArrayList<Bullet> arr) {
 
 void renderParticles() {  //function to display particles
   for (int k = 0; k < p1particles.size (); k++) {
-    //    if (int(random(0, 2))==0) {
-    //      Particle p1 = (CrazyParticle) p1particles.get(k);
-    //      Particle p2 = (CrazyParticle) p2particles.get(k);
-    //    } else {
+
     Particle p1 = (Particle) p1particles.get(k);
     Particle p2 = (Particle) p2particles.get(k);
-    //    }
 
     p1.run();
-//    p1.gravity();
     p1.display();
 
     p2.run();
-//    p2.gravity();
     p2.display();
   }
 }
@@ -538,7 +514,7 @@ class Particle {
     this.state = state;
     xspeed = random(-5, 5);
     yspeed = random(-5, 5);
-    
+
     if (direction > 0) {
       this.variation = p1ParticleVariation;
     } else {
@@ -548,36 +524,18 @@ class Particle {
   }
 
   void run() {
-      if (life > 0) {
-        life -= 1;
-    x = x + xspeed;
-    y = y + yspeed;
-    if (x > width || x < 0) { //to bounce of walls
-      xspeed*= -1;
-    }
-    if (y > height || y < 0) {
-      yspeed*= -1;
+    if (life > 0) {
+      life -= 1;
+      x = x + xspeed;
+      y = y + yspeed;
+      if (x > width || x < 0) { //to bounce of walls
+        xspeed*= -1;
+      }
+      if (y > height || y < 0) {
+        yspeed*= -1;
+      }
     }
   }
-  }
-//
-//  void gravity() {
-//    if (yspeed > 0) {
-//      yspeed -= 0.05;
-//    }
-//
-//    if (yspeed < 0) {
-//      yspeed += 0.05;
-//    }
-//
-//    if (xspeed > 0) {
-//      xspeed -= 0.05;
-//    }
-//
-//    if (xspeed < 0) {
-//      xspeed += 0.05;
-//    }
-//  }
 
   void display() {
     noStroke();   
