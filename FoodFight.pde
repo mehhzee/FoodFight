@@ -531,12 +531,11 @@ class Particle {
         stroke(#ff0000);
         noFill();
         ellipse(this.x, this.y, particleSize, particleSize);
-//        ellipse(other.x, other.y, playerHeight, playerHeight);
       }
-      if (x > width || x < 0) { //to bounce of walls
+      if (x > width - particleSize/2 || x < particleSize/2) { //to bounce of walls
         xspeed*= -1;
       }
-      if (y > height || y < 0) {
+      if (y > height - particleSize/2 || y < particleSize/2) {
         yspeed*= -1;
       }
     }
@@ -544,6 +543,8 @@ class Particle {
 
   void display() {
     noStroke();   
-    shape(particleShapes[state][variation], x, y, particleSize, particleSize);
+    PShape s = particleShapes[state][variation];
+    float scaleWidth = s.width * (particleSize/s.height);
+    shape(s, x, y, scaleWidth, particleSize);
   }
 } // <--- end of class Particle
