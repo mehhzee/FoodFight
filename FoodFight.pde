@@ -188,17 +188,32 @@ class Bullet {           //bullet class to one bullet
       c = color(0);
     }
 
+    pushMatrix();
     //    fill(c);
     // display player 1 bullets
     if (state==1) {
-      shape (burger, x, y, playerWidth, (playerHeight*0.81));
+
+      translate(x, y);
+      if (direction < 0) {
+        translate(playerWidth, 0);
+        scale(-1, 1);
+      }
+
+      shape (burger, 0, 0, playerWidth, (playerHeight*0.81));
     }
     if (state==2) {
-      shape(soda, x, y+20, (playerWidth*0.68), (playerHeight*1.1));
+      translate(x, y+20);
+      if (direction < 0) {
+        translate(playerWidth, 0);
+        scale(-1, 1);
+      }
+
+      shape(soda, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
     if (state==3) {
       triangle (x+25, y+75, x+50, y+25, x+75, y+75);
     }
+    popMatrix();
   }
 
   void move() {
@@ -284,7 +299,7 @@ void player2() {
 }
 
 
-void keyPressed() {
+void keyPressed() { 
   if (p1Selected == false) {
     if (key=='1') {
       p1Selected = true;
@@ -350,11 +365,8 @@ void keyPressed() {
     if ((key=='j') && (coolDownP2 == 0)) {
       coolDownP2 = MAXCOOLDOWN;
       // create bullet with state
-      pushMatrix();
-      scale(-1.0, 1.0);
       Bullet temp = new Bullet(-(-width + playerWidth), p2Ypos, p2Selection, -1);
       bullets.add(temp);
-      popMatrix();
     }
   }
 
