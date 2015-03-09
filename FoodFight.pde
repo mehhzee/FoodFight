@@ -22,8 +22,10 @@ int p2Selectionx;
 int p2Selectiony;
 int MAX_FPS = 60;
 
-PImage p1Choose;
-PImage p2Choose;
+PShape p1Choose;
+PShape p2Choose;
+PShape p1Wait;
+PShape p2Wait;
 
 // game components
 
@@ -48,6 +50,7 @@ PShape soda;
 
 PShape icecream;
 PShape icecream_pocky;
+PShape icecream_pocky2;
 PShape icecream_cherry;
 
 int playerWidth = 120;
@@ -75,16 +78,25 @@ int MAXCOOLDOWN = MAX_FPS / SHOTS_PER_SECOND; //captials to show that values wil
 
 // save final art
 PImage artwork;
+PImage grad;
+color c1, c2;
+int Y_AXIS = 1;
+int X_AXIS = 2;
 
 
 void setup() {
-  size(1280, 800, P3D);
+  size(displayWidth, displayHeight, P3D);
   smooth(8);
   frameRate (MAX_FPS);
+  color c1 = color(random(255), random(255), random(255));//first color of the gradient background
+  color c2 = color(random(255), random(255), random(255));//second color of the gradient background
+  grad = generateGradient(c1, c2, width, height);
 
   // player selection
-  p1Choose = loadImage("P1Selection.v1.jpg");
-  p2Choose = loadImage("P2Selection.v1.jpg"); 
+  p1Choose = loadShape("SmashMash_P1Select.svg");
+  p2Choose = loadShape("SmashMash_P2Select.svg"); 
+  p1Wait = loadShape("SmashMash_P1Selected.svg");
+  p2Wait = loadShape("SmashMash_P2Selected.svg"); 
 
   // Size needs to always be one bigger than the amount of bullet types because
   // state starts at 1 instead of 0
@@ -99,6 +111,7 @@ void setup() {
   icecream = loadShape("SmashMash_IceCream_Icon.svg");  
   icecream_cherry = loadShape("Icecream_Cherry.svg");
   icecream_pocky = loadShape("Icecream_Pocky.svg");
+  icecream_pocky2 = loadShape("Icecream_Pocky2.svg");
 
   end = loadImage("EndOfGame.png");
 
@@ -114,6 +127,7 @@ void setup() {
   };
   particleShapes[3] = new PShape[] { 
     icecream_pocky, 
+    icecream_pocky2, 
     icecream_cherry
   };
 
@@ -141,10 +155,9 @@ void setup() {
 
 void draw() {
   if (saveScreen) {
-    background(#35495E);
+    image(grad, 0, 0);
   } else {
-    fill(#35495E, 127);
-    rect(0, 0, width, height);
+    image(grad, 0, 0);//background image is displayed
   }
 
   PlayerSelection();
@@ -180,6 +193,32 @@ void draw() {
   }
 }
 
+PImage generateGradient(color top, color bottom, int w, int h) {
+  int tR = (top >> 16) & 0xFF;
+  int tG = (top >> 8) & 0xFF;
+  int tB = top & 0xFF;
+  int bR = (bottom >> 16) & 0xFF;
+  int bG = (bottom >> 8) & 0xFF;
+  int bB = bottom & 0xFF;
+
+  PImage bg = createImage(w, h, RGB);
+  bg.loadPixels();
+  for (int i=0; i < bg.pixels.length; i++) {
+    int y = i/bg.width;
+    float n = y/(float)bg.height;
+    // for a horizontal gradient:
+    // float n = x/(float)bg.width;
+    bg.pixels[i] = color(
+    lerp(tR, bR, n), 
+    lerp(tG, bG, n), 
+    lerp(tB, bB, n), 
+    100);
+  }
+  bg.updatePixels();
+  return bg;
+}
+
+
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
   for (int i = 0; i < arr.size (); ) {
     Bullet temp = arr.get(i);
@@ -199,11 +238,19 @@ void removeOutOfBounds(ArrayList<Bullet> arr) {
 
 void PlayerSelection() {
   if (p2Selected == false) {
-    image(p2Choose, 0, 0);
+    shape(p2Choose, width/2, 0);
+  }
+
+  if ((p1Selected == true) && (p2Selected == false)) {
+    shape(p1Wait, 0, 0);
+  }
+
+  if ((p2Selected == true) && (p1Selected == false)) {
+    shape(p2Wait, width/2, 0);
   }
 
   if (p1Selected == false) {
-    image(p1Choose, 0, 0);
+    shape(p1Choose, 0, 0);
   }
 }
 
@@ -216,6 +263,9 @@ void restart() {
   p2Selected = false;
   p1Score = 0;
   p2Score = 0;
+  color c1 = color(random(255), random(255), random(255));//first color of the gradient background
+  color c2 = color(random(255), random(255), random(255));//second color of the gradient background
+  grad = generateGradient(c1, c2, width, height);
   bullets.clear();
   particles.clear();
 }
@@ -267,7 +317,7 @@ class Bullet {           //bullet class to one bullet
     //---- debug visual
     if (DEBUG) {
       stroke(random(255), random(255), random(255));
-      noFill();
+      fill(random(255), random(255), random(255));
       ellipse(this.x, this.y, playerHeight, playerHeight);
       ellipse(other.x, other.y, playerHeight, playerHeight);
     }
@@ -356,25 +406,34 @@ void keyPressed() {
       p1Selected = true;
       p1Selection = 3;
     }
+    if (key=='4') {
+      p1Selected = true;
+      p1Selection = 4;
+    }
     println(p1Selection);
   }
 
-  if ((p1Selected == true) && (p2Selected == false)) {
-    if (key=='4') {
+  if (p2Selected == false) {
+    if (key=='5') {
       p2Selected = true;
       p2Selection = 1;
     }
-    if (key=='5') {
+    if (key=='6') {
       p2Selected = true;
       p2Selection = 2;
     }
-    if (key=='6') {
+    if (key=='7') {
       p2Selected = true;
       p2Selection = 3;
     }
+    if (key=='8') {
+      p2Selected = true;
+      p2Selection = 4;
+    }
+    
     println(p2Selection);
 
-    if (p2Selected) {
+    if (p2Selected && p1Selected) {
       // Now that all the players have chosen their bullet type, we can choose their variation randomly
       p1ParticleVariation = int(random(0, particleShapes[p1Selection].length));
       p2ParticleVariation = int(random(0, particleShapes[p2Selection].length));
@@ -527,7 +586,7 @@ class Particle {
   void display() {
     noStroke();   
     pushMatrix();
-    translate(x,y);
+    translate(x, y);
     float a = atan2(yspeed, xspeed);
     rotate(a);
     PShape s = particleShapes[state][variation];
