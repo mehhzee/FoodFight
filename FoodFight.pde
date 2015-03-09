@@ -1,3 +1,16 @@
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
+
+Minim minim;
+AudioPlayer shoot1;
+AudioPlayer shoot2;
+AudioPlayer collide;
+AudioPlayer score;
+
 boolean gameTitle = false;
 boolean gameSelect = false;
 boolean gameInstruction = false;
@@ -10,7 +23,7 @@ boolean p2Selected = false;
 boolean saveScreen = false;
 boolean DEBUG = true;
 
-int win = 1;
+int win = 5;
 int particleSize = 40;
 
 int p1Selection;
@@ -22,10 +35,20 @@ int p2Selectionx;
 int p2Selectiony;
 int MAX_FPS = 60;
 
+PShape smashMash;
+
 PShape p1Choose;
 PShape p2Choose;
 PShape p1Wait;
 PShape p2Wait;
+
+PShape S;
+PShape M;
+PShape A;
+PShape S2;
+PShape H;
+
+PShape end;
 
 // game components
 
@@ -37,7 +60,7 @@ ArrayList <Particle> particles;
 
 PImage[] p1;
 PImage[] p2;
-PImage end;
+
 
 PShape[][] particleShapes; 
 //[bullet int][particles variations]
@@ -45,13 +68,26 @@ PShape[][] particleShapes;
 PShape burger;
 PShape burger_tomato;
 PShape burger_bacon;
+PShape burger_bun;
+PShape burger_patty;
 
 PShape soda;
+PShape soda_cup;
+PShape soda_spill;
+PShape soda_spill2;
+PShape soda_straw;
 
 PShape icecream;
 PShape icecream_pocky;
 PShape icecream_pocky2;
 PShape icecream_cherry;
+PShape icecream_melt;
+
+
+PShape fries;
+PShape fries_fries1;
+PShape fries_fries2;
+PShape fries_blood;
 
 int playerWidth = 120;
 int playerHeight = 120;
@@ -92,43 +128,82 @@ void setup() {
   color c2 = color(random(255), random(255), random(255));//second color of the gradient background
   grad = generateGradient(c1, c2, width, height);
 
+  minim = new Minim(this);
+  shoot1 = minim.loadFile("shoot.wav");
+  shoot2 = minim.loadFile("shoot2.wav");
+  collide = minim.loadFile("collide.wav");
+  score = minim.loadFile("score.wav");
+
+  smashMash = loadShape("SmashMash_Title.svg");
   // player selection
   p1Choose = loadShape("SmashMash_P1Select.svg");
   p2Choose = loadShape("SmashMash_P2Select.svg"); 
   p1Wait = loadShape("SmashMash_P1Selected.svg");
   p2Wait = loadShape("SmashMash_P2Selected.svg"); 
 
+  S = loadShape("SmashMash_S.svg");
+  M = loadShape("SmashMash_M.svg");
+  A = loadShape("SmashMash_A.svg");
+  S2 = loadShape("SmashMash_S.svg");
+  H = loadShape("SmashMash_H.svg");
+
   // Size needs to always be one bigger than the amount of bullet types because
   // state starts at 1 instead of 0
-  particleShapes = new PShape[4][];
+  particleShapes = new PShape[5][];
 
   burger = loadShape("SmashMash_Burger_Icon.svg");
   burger_tomato = loadShape("Burger_Tomato.svg");
   burger_bacon = loadShape("Burger_Bacon.svg");
+  burger_bun = loadShape("Burger_Bun.svg");
+  burger_patty = loadShape("Burger_Patty.svg");
 
   soda = loadShape("SmashMash_Soda_Icon.svg");
+  soda_cup = loadShape("Soda_Cup.svg");
+  soda_spill = loadShape("Soda_Spill.svg");
+  soda_spill2 = loadShape("Soda_Spill02.svg");
+  soda_straw = loadShape("Soda_Straw.svg");
+
 
   icecream = loadShape("SmashMash_IceCream_Icon.svg");  
   icecream_cherry = loadShape("Icecream_Cherry.svg");
   icecream_pocky = loadShape("Icecream_Pocky.svg");
   icecream_pocky2 = loadShape("Icecream_Pocky2.svg");
+  icecream_melt = loadShape("Icecream_Melt.svg");
 
-  end = loadImage("EndOfGame.png");
+
+  fries = loadShape("SmashMash_Fries_Icon.svg");
+  fries_fries1 = loadShape("Fries_Fries1.svg");
+  fries_fries2 = loadShape("Fries_Fries2.svg");
+  fries_blood = loadShape("Fries_Blood.svg");
+
+  end = loadShape("EndGame.svg");
 
 
   // Setup the particle shapes, it is double layered (2 dimensional)
   // You first access it by the 'state' of the particle : bullet->(burger, or drink or icecream)
   // THEN you access that by its 'variation' which would be the different particle images for each type of bullet.
   particleShapes[1] = new PShape[] { 
-    burger_tomato, burger_bacon
+    burger_tomato, 
+    burger_bacon, 
+    burger_bun, 
+    burger_patty
   };
   particleShapes[2] = new PShape[] { 
-    icecream_cherry
+    soda_spill, 
+    soda_spill2, 
+    soda_cup, 
+    soda_straw
   };
   particleShapes[3] = new PShape[] { 
     icecream_pocky, 
     icecream_pocky2, 
-    icecream_cherry
+    icecream_cherry,
+    icecream_melt
+  };
+  particleShapes[4] = new PShape[] { 
+    fries_fries1, 
+    fries_fries2, 
+    fries_blood
   };
 
 
@@ -154,42 +229,49 @@ void setup() {
 }
 
 void draw() {
-  if (saveScreen) {
+
+  if (gameTitle == false) {
     image(grad, 0, 0);
   } else {
     image(grad, 0, 0);//background image is displayed
   }
 
-  PlayerSelection();
-  checkCollisions(bullets);
+  smashMashTitle();
+  if (gameStart == true) {
+    PlayerSelection();
 
-  if ((p1Selected==true)&&(p2Selected==true)) {
-    if ((p1Score < win) && (p2Score < win)) {
-      player1();//display player1
-      player2();//display player2
+    checkCollisions(bullets);
+
+    if ((p1Selected==true)&&(p2Selected==true)) {
+      if ((p1Score < win) && (p2Score < win)) {
+        player1();//display player1
+        player2();//display player2
+      }
+
+      removeOutOfBounds(bullets);
+      moveAll(bullets);
+      displayAll(bullets);
+
+
+      if (coolDownP1 > 0) {
+        coolDownP1 -= 1;
+      }
+      if (coolDownP2 > 0) {
+        coolDownP2 -= 1;
+      }
     }
 
-    removeOutOfBounds(bullets);
-    moveAll(bullets);
-    displayAll(bullets);
-
-
-    if (coolDownP1 > 0) {
-      coolDownP1 -= 1;
+    renderParticles();
+    if (saveScreen) {
+      savescreen();
+      saveScreen = false;
     }
-    if (coolDownP2 > 0) {
-      coolDownP2 -= 1;
+
+    livesCounter();
+
+    if ((p1Score >= win) || (p2Score >= win)) {
+      shape(end, 0, 0);
     }
-  }
-
-  renderParticles();
-  if (saveScreen) {
-    savescreen();
-    saveScreen = false;
-  }
-
-  if ((p1Score >= win) || (p2Score >= win)) {
-    image(end, 0, 0);
   }
 }
 
@@ -218,6 +300,72 @@ PImage generateGradient(color top, color bottom, int w, int h) {
   return bg;
 }
 
+void livesCounter() {
+  int x1 = 50;
+  int x2 = 300;
+  int y = 30;
+  int scoreHeight = 3;
+
+  if (p1Score >= 1) {
+    shape(S, x1, y, 28.5/scoreHeight, 50/scoreHeight );
+    x1 += 50;
+  }
+
+  if (p1Score >= 2) {
+    shape(M, x1, y, 40.7/scoreHeight, 50/scoreHeight );
+    x1 += 55;
+  }
+
+  if (p1Score >= 3) {
+    shape(A, x1, y, 36.2/scoreHeight, 50/scoreHeight );
+    x1 += 50;
+  }
+
+  if (p1Score >= 4) {
+    shape(S2, x1, y, 28.5/scoreHeight, 50/scoreHeight );
+    x1 += 50;
+  }
+
+  if (p1Score >= 5) {
+    shape(H, x1, y, 28.5/scoreHeight, 50/scoreHeight );
+    x1 += 50;
+  }
+
+  if (p2Score >= 1) {
+    shape(S, width-x2, y, 28.5/scoreHeight, 50/scoreHeight );
+    x2 -= 50;
+  }
+
+  if (p2Score >= 2) {
+    shape(M, width-x2, y, 40.7/scoreHeight, 50/scoreHeight );
+    x2 -= 55;
+  }
+
+  if (p2Score >= 3) {
+    shape(A, width-x2, y, 36.2/scoreHeight, 50/scoreHeight );
+    x2 -= 50;
+  }
+
+  if (p2Score >= 4) {
+    shape(S2, width-x2, y, 28.5/scoreHeight, 50/scoreHeight );
+    x2 -= 50;
+  }
+
+  if (p2Score >= 5) {
+    shape(H, width-x2, y, 28.5/scoreHeight, 50/scoreHeight );
+    x2 -= 50;
+  }
+
+  //  for (int p1S = 0; p1S < p2Score; p1S++) {
+  //    shape(lives, x1, y, 20, 20);
+  //    x1 += 50;
+  //  } 
+  //
+  //  for (int p2S = 0; p2S < p1Score; p2S++) {
+  //    shape(lives, width-x2, y, 20, 20);
+  //    x2 += 50;
+  //  }
+}
 
 void removeOutOfBounds(ArrayList<Bullet> arr) { 
   for (int i = 0; i < arr.size (); ) {
@@ -225,18 +373,49 @@ void removeOutOfBounds(ArrayList<Bullet> arr) {
     if (temp.x < 0) {
       arr.remove(i);
       p2Score += 1;
+      score.rewind();
+      score.play();
       System.out.println("Scores: P1 = " + p1Score + " - P2 = " + p2Score);
     } else if (temp.x > width) {
       arr.remove(i);
       p1Score += 1;
+      score.rewind();
+      score.play();
       System.out.println("Scores: P1 = " + p1Score + " - P2 = " + p2Score);
     } else {
       i++;
     }
   }
 }
+void title() {
+  int x = width - 275;
+  int y = height/2 - 85;
+
+  fill(255);
+  text("void keyPressed ( ) {", x-12, y);
+  fill(255);
+  text("if ( key ==", x-16, y+15);
+  fill(#76ff84);
+  text("SPACE", x+50, y+15);
+  fill(255);
+  text(") {", x+92, y+15);
+  fill(255);
+  text("gameStart ( );", x+27, y+30);
+  fill(255);
+  text("}", x+100, y+45);
+  fill(255);
+  text("}", x+100, y+60);
+}
+
+void smashMashTitle() {
+  if (gameTitle == false) {
+    shape(smashMash, 0, 0);
+    title();
+  }
+}
 
 void PlayerSelection() {
+
   if (p2Selected == false) {
     shape(p2Choose, width/2, 0);
   }
@@ -305,6 +484,9 @@ class Bullet {           //bullet class to one bullet
     if (state==3) {
       shape(icecream, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
     }
+    if (state==4) {
+      shape(fries, 0, 0, (playerWidth*0.8), (playerHeight));
+    }
     popMatrix();
   }
 
@@ -316,7 +498,7 @@ class Bullet {           //bullet class to one bullet
   boolean collides_with(Bullet other) {
     //---- debug visual
     if (DEBUG) {
-      stroke(random(255), random(255), random(255));
+      noStroke();
       fill(random(255), random(255), random(255));
       ellipse(this.x, this.y, playerHeight, playerHeight);
       ellipse(other.x, other.y, playerHeight, playerHeight);
@@ -366,6 +548,9 @@ void player1() {
   if (p1Selection==3) {
     shape(icecream, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
   }
+  if (p1Selection==4) {
+    shape(fries, p1Xpos, p1Ypos, (playerWidth*0.9), (playerHeight*1.1));
+  }
 }
 
 void player2() {
@@ -389,11 +574,24 @@ void player2() {
     shape (icecream, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
     popMatrix();
   }
+  if (p2Selection==4) {
+    pushMatrix();
+    scale (-1.0, 1.0);
+    shape(fries, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.9), (playerHeight*1.1));
+    popMatrix();
+  }
 }
 
 
 void keyPressed() { 
-  if (p1Selected == false) {
+
+  if (gameTitle == false) {
+    if (key == ' ' ) {
+      gameTitle = true;
+      gameStart = true;
+    }
+  }
+  if ((p1Selected == false) && (gameTitle == true)) {
     if (key=='1') {
       p1Selected = true;
       p1Selection = 1;
@@ -413,7 +611,7 @@ void keyPressed() {
     println(p1Selection);
   }
 
-  if (p2Selected == false) {
+  if ((p2Selected == false) && (gameTitle == true)) {
     if (key=='5') {
       p2Selected = true;
       p2Selection = 1;
@@ -430,7 +628,7 @@ void keyPressed() {
       p2Selected = true;
       p2Selection = 4;
     }
-    
+
     println(p2Selection);
 
     if (p2Selected && p1Selected) {
@@ -453,6 +651,8 @@ void keyPressed() {
     //keypress for bullet
     if ((key=='d') && (coolDownP1 == 0)) {
       // create bullet with state
+      shoot1.rewind();
+      shoot1.play();
       coolDownP1 = MAXCOOLDOWN;
       Bullet temp = new Bullet(playerWidth, p1Ypos, p1Selection, 1);
       bullets.add(temp);
@@ -472,6 +672,8 @@ void keyPressed() {
 
     //keypress for bullet
     if ((key=='j') && (coolDownP2 == 0)) {
+      shoot2.rewind();
+      shoot2.play();
       coolDownP2 = MAXCOOLDOWN;
       // create bullet with state
       Bullet temp = new Bullet(-(-width + playerWidth), p2Ypos, p2Selection, -1);
@@ -525,7 +727,8 @@ void checkCollisions(ArrayList<Bullet> arr) {
           particles.add(new Particle(pX, pY, p1Selection, 1));
           particles.add(new Particle(pX, pY, p2Selection, -1));
         }
-
+        collide.rewind();
+        collide.play();
         // remove bullets
         arr.remove(j); // need to remove j first because it is larger than i always
         arr.remove(i);
