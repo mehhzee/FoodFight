@@ -33,6 +33,9 @@ boolean p2Selected = false;
 
 boolean saveScreen = false;
 boolean DEBUG = true;
+boolean sketchFullScreen() {
+ return true;
+}
 
 int win = 5;
 int particleSize = 40;
@@ -142,11 +145,11 @@ void setup() {
   p1Wait = new Gif(this, "SmashMash_P1Selected.gif");
   p2Wait = new Gif(this, "SmashMash_P2Selected.gif");
   introductionAnimation.play();
-  titleAnimation.loop();
-  p1Choose.loop();
-  p2Choose.loop();
-  p1Wait.loop();
-  p2Wait.loop();
+//  titleAnimation.play();
+//  p1Choose.play();
+//  p2Choose.play();
+//  p1Wait.play();
+//  p2Wait.play();
 
   myMovie = new Movie(this, "comp1.mov");
   myMovie.loop();
