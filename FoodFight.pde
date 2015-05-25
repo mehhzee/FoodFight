@@ -8,6 +8,10 @@ import ddf.minim.effects.*;
 import gifAnimation.*;
 Gif titleAnimation;
 Gif introductionAnimation;
+Gif p1Choose;
+Gif p2Choose;
+Gif p1Wait;
+Gif p2Wait;
 
 import processing.video.*;
 Movie myMovie;
@@ -44,10 +48,6 @@ int MAX_FPS = 60;
 
 PShape smashMash;
 
-PShape p1Choose;
-PShape p2Choose;
-PShape p1Wait;
-PShape p2Wait;
 
 PShape S;
 PShape M;
@@ -137,8 +137,16 @@ void setup() {
   //  myAnimation.play();
   titleAnimation = new Gif(this, "SmashMash_Title.gif");
   introductionAnimation = new Gif(this, "SmashMash_Introduction.gif");
+  p1Choose = new Gif(this, "SmashMash_P1Selection.gif");
+  p2Choose = new Gif(this, "SmashMash_P2Selection.gif");
+  p1Wait = new Gif(this, "SmashMash_P1Selected.gif");
+  p2Wait = new Gif(this, "SmashMash_P2Selected.gif");
   introductionAnimation.play();
-  titleAnimation.play();
+  titleAnimation.loop();
+  p1Choose.loop();
+  p2Choose.loop();
+  p1Wait.loop();
+  p2Wait.loop();
 
   myMovie = new Movie(this, "comp1.mov");
   myMovie.loop();
@@ -156,10 +164,10 @@ void setup() {
   //  smashMash = loadShape("SmashMash_Title.svg");
   // player selection
 
-  p1Choose = loadShape("SmashMash_P1Select.svg");
-  p2Choose = loadShape("SmashMash_P2Select.svg"); 
-  p1Wait = loadShape("SmashMash_P1Selected.svg");
-  p2Wait = loadShape("SmashMash_P2Selected.svg"); 
+//  p1Choose = loadShape("SmashMash_P1Select.svg");
+//  p2Choose = loadShape("SmashMash_P2Select.svg"); 
+//  p1Wait = loadShape("SmashMash_P1Selected.svg");
+//  p2Wait = loadShape("SmashMash_P2Selected.svg"); 
 
   S = loadShape("SmashMash_S.svg");
   M = loadShape("SmashMash_M.svg");
@@ -457,19 +465,19 @@ void draw() {
   void PlayerSelection() {
 
     if (p2Selected == false) {
-      shape(p2Choose, width/2, 0);
+      image(p2Choose, width/2, 0);
     }
 
     if ((p1Selected == true) && (p2Selected == false)) {
-      shape(p1Wait, 0, 0);
+      image(p1Wait, 0, 0);
     }
 
     if ((p2Selected == true) && (p1Selected == false)) {
-      shape(p2Wait, width/2, 0);
+      image(p2Wait, width/2, 0);
     }
 
     if (p1Selected == false) {
-      shape(p1Choose, 0, 0);
+      image(p1Choose, 0, 0);
     }
   }
 
