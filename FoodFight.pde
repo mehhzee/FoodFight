@@ -5,7 +5,11 @@ import ddf.minim.analysis.*;
 import ddf.minim.ugens.*;
 import ddf.minim.effects.*;
 
-Minim minim;
+import gifAnimation.*;
+Gif myAnimation;
+
+
+Minim minim; 
 AudioPlayer shoot1;
 AudioPlayer shoot2;
 AudioPlayer collide;
@@ -65,29 +69,30 @@ PImage[] p2;
 PShape[][] particleShapes; 
 //[bullet int][particles variations]
 
-PShape burger;
-PShape burger_tomato;
-PShape burger_bacon;
-PShape burger_bun;
-PShape burger_patty;
+PShape modrian;
+PShape modrian_1;
+PShape modrian_2;
+PShape modrian_3;
+PShape modrian_4;
 
-PShape soda;
-PShape soda_cup;
-PShape soda_spill;
-PShape soda_spill2;
-PShape soda_straw;
+PShape penfold;
+PShape penfold_1;
+PShape penfold_2;
+PShape penfold_3;
+PShape penfold_4;
 
-PShape icecream;
-PShape icecream_pocky;
-PShape icecream_pocky2;
-PShape icecream_cherry;
-PShape icecream_melt;
+PShape warhol;
+PShape warhol_1;
+PShape warhol_2;
+PShape warhol_3;
+PShape warhol_4;
 
 
-PShape fries;
-PShape fries_fries1;
-PShape fries_fries2;
-PShape fries_blood;
+PShape campbell;
+PShape campbell_1;
+PShape campbell_2;
+PShape campbell_3;
+PShape campbell_4;
 
 int playerWidth = 120;
 int playerHeight = 120;
@@ -124,6 +129,9 @@ void setup() {
   size(displayWidth, displayHeight, P3D);
   smooth(8);
   frameRate (MAX_FPS);
+
+  myAnimation  = new Gif(this, "smashmash.gif");
+  myAnimation.play();
   color c1 = color(random(255), random(255), random(255));//first color of the gradient background
   color c2 = color(random(255), random(255), random(255));//second color of the gradient background
   grad = generateGradient(c1, c2, width, height);
@@ -134,7 +142,7 @@ void setup() {
   collide = minim.loadFile("collide.wav");
   score = minim.loadFile("score.wav");
 
-  smashMash = loadShape("SmashMash_Title.svg");
+  //  smashMash = loadShape("SmashMash_Title.svg");
   // player selection
   p1Choose = loadShape("SmashMash_P1Select.svg");
   p2Choose = loadShape("SmashMash_P2Select.svg"); 
@@ -151,59 +159,61 @@ void setup() {
   // state starts at 1 instead of 0
   particleShapes = new PShape[5][];
 
-  burger = loadShape("SmashMash_Burger_Icon.svg");
-  burger_tomato = loadShape("Burger_Tomato.svg");
-  burger_bacon = loadShape("Burger_Bacon.svg");
-  burger_bun = loadShape("Burger_Bun.svg");
-  burger_patty = loadShape("Burger_Patty.svg");
+  modrian = loadShape("SmashMash_Modrian.svg");
+  modrian_1 = loadShape("SmashMash_Modrian_1.svg");
+  modrian_2 = loadShape("SmashMash_Modrian_2.svg");
+  modrian_3 = loadShape("SmashMash_Modrian_3.svg");
+  modrian_4 = loadShape("SmashMash_Modrian_4.svg");
 
-  soda = loadShape("SmashMash_Soda_Icon.svg");
-  soda_cup = loadShape("Soda_Cup.svg");
-  soda_spill = loadShape("Soda_Spill.svg");
-  soda_spill2 = loadShape("Soda_Spill02.svg");
-  soda_straw = loadShape("Soda_Straw.svg");
-
-
-  icecream = loadShape("SmashMash_IceCream_Icon.svg");  
-  icecream_cherry = loadShape("Icecream_Cherry.svg");
-  icecream_pocky = loadShape("Icecream_Pocky.svg");
-  icecream_pocky2 = loadShape("Icecream_Pocky2.svg");
-  icecream_melt = loadShape("Icecream_Melt.svg");
+  penfold = loadShape("SmashMash_Penfold.svg");
+  penfold_1 = loadShape("SmashMash_Penfold_1.svg");
+  penfold_2 = loadShape("SmashMash_Penfold_2.svg");
+  penfold_3 = loadShape("SmashMash_Penfold_3.svg");
+  penfold_4 = loadShape("SmashMash_Penfold_4.svg");
 
 
-  fries = loadShape("SmashMash_Fries_Icon.svg");
-  fries_fries1 = loadShape("Fries_Fries1.svg");
-  fries_fries2 = loadShape("Fries_Fries2.svg");
-  fries_blood = loadShape("Fries_Blood.svg");
+  warhol = loadShape("SmashMash_Warhol.svg");  
+  warhol_1 = loadShape("SmashMash_Warhol_1.svg");
+  warhol_2 = loadShape("SmashMash_Warhol_2.svg");
+  warhol_3 = loadShape("SmashMash_Warhol_3.svg");
+  warhol_4 = loadShape("SmashMash_Warhol_4.svg");
+
+
+  campbell = loadShape("SmashMash_Campbell.svg");
+  campbell_1 = loadShape("SmashMash_Campbell_1.svg");
+  campbell_2 = loadShape("SmashMash_Campbell_2.svg");
+  campbell_3 = loadShape("SmashMash_Campbell_3.svg");
+  campbell_4 = loadShape("SmashMash_Campbell_4.svg");
 
   end = loadShape("EndGame.svg");
 
 
   // Setup the particle shapes, it is double layered (2 dimensional)
-  // You first access it by the 'state' of the particle : bullet->(burger, or drink or icecream)
+  // You first access it by the 'state' of the particle : bullet->(modrian, or drink or warhol)
   // THEN you access that by its 'variation' which would be the different particle images for each type of bullet.
   particleShapes[1] = new PShape[] { 
-    burger_tomato, 
-    burger_bacon, 
-    burger_bun, 
-    burger_patty
+    modrian_1, 
+    modrian_2, 
+    modrian_3, 
+    modrian_4
   };
   particleShapes[2] = new PShape[] { 
-    soda_spill, 
-    soda_spill2, 
-    soda_cup, 
-    soda_straw
+    penfold_1, 
+    penfold_2, 
+    penfold_3, 
+    penfold_4,
   };
   particleShapes[3] = new PShape[] { 
-    icecream_pocky, 
-    icecream_pocky2, 
-    icecream_cherry,
-    icecream_melt
+    warhol_1, 
+    warhol_2, 
+    warhol_3, 
+    warhol_4,
   };
   particleShapes[4] = new PShape[] { 
-    fries_fries1, 
-    fries_fries2, 
-    fries_blood
+    campbell_1, 
+    campbell_2, 
+    campbell_3, 
+    campbell_4,
   };
 
 
@@ -409,7 +419,7 @@ void title() {
 
 void smashMashTitle() {
   if (gameTitle == false) {
-    shape(smashMash, 0, 0);
+    image (myAnimation, 0, 0);
     title();
   }
 }
@@ -476,16 +486,16 @@ class Bullet {           //bullet class to one bullet
       scale(-1, 1);
     }
     if (state==1) {
-      shape (burger, 0, 0, playerWidth, (playerHeight*0.81));
+      shape (modrian, 0, 0, playerWidth, (playerHeight));
     }
     if (state==2) {
-      shape(soda, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
+      shape(penfold, 0, 0, (playerWidth), (playerHeight));
     }
     if (state==3) {
-      shape(icecream, 0, 0, (playerWidth*0.68), (playerHeight*1.1));
+      shape(warhol, 0, 0, (playerWidth), (playerHeight));
     }
     if (state==4) {
-      shape(fries, 0, 0, (playerWidth*0.8), (playerHeight));
+      shape(campbell, 0, 0, (playerWidth-30), (playerHeight));
     }
     popMatrix();
   }
@@ -540,16 +550,16 @@ void displayAll(ArrayList<Bullet> arr) {
 
 void player1() {
   if (p1Selection==1) {
-    shape(burger, p1Xpos, p1Ypos, (playerWidth), (playerHeight*0.81));
+    shape(modrian, p1Xpos, p1Ypos, (playerWidth), (playerHeight));
   }
   if (p1Selection==2) {
-    shape(soda, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
+    shape(penfold, p1Xpos, p1Ypos, (playerWidth), (playerHeight));
   }
   if (p1Selection==3) {
-    shape(icecream, p1Xpos, p1Ypos, (playerWidth*0.68), (playerHeight*1.1));
+    shape(warhol, p1Xpos, p1Ypos, (playerWidth), (playerHeight));
   }
   if (p1Selection==4) {
-    shape(fries, p1Xpos, p1Ypos, (playerWidth*0.9), (playerHeight*1.1));
+    shape(campbell, p1Xpos, p1Ypos, (playerWidth-30), (playerHeight));
   }
 }
 
@@ -557,27 +567,27 @@ void player2() {
   if (p2Selection==1) {
     pushMatrix();
     scale (-1.0, 1.0);
-    shape(burger, -(p2Xpos + playerWidth), p2Ypos, (playerWidth), (playerHeight*0.81));
+    shape(modrian, -(p2Xpos + playerWidth), p2Ypos, (playerWidth), (playerHeight));
     popMatrix();
   }
 
   if (p2Selection==2) {
     pushMatrix();
     scale (-1.0, 1.0);
-    shape (soda, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
+    shape (penfold, -(p2Xpos + playerWidth), p2Ypos, (playerWidth), (playerHeight));
     popMatrix();
   }
 
   if (p2Selection==3) {
     pushMatrix();
     scale (-1.0, 1.0);
-    shape (icecream, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.68), (playerHeight*1.1));
+    shape (warhol, -(p2Xpos + playerWidth), p2Ypos, (playerWidth), (playerHeight));
     popMatrix();
   }
   if (p2Selection==4) {
     pushMatrix();
     scale (-1.0, 1.0);
-    shape(fries, -(p2Xpos + playerWidth), p2Ypos, (playerWidth*0.9), (playerHeight*1.1));
+    shape(campbell, -(p2Xpos + playerWidth), p2Ypos, (playerWidth-30), (playerHeight));
     popMatrix();
   }
 }
