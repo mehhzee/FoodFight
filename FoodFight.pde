@@ -5,9 +5,11 @@ import ddf.minim.analysis.*;
 import ddf.minim.ugens.*;
 import ddf.minim.effects.*;
 
-import gifAnimation.*;
-Gif myAnimation;
+//import gifAnimation.*;
+//Gif myAnimation;
 
+import processing.video.*;
+Movie myMovie;
 
 Minim minim; 
 AudioPlayer shoot1;
@@ -130,8 +132,11 @@ void setup() {
   smooth(8);
   frameRate (MAX_FPS);
 
-  myAnimation  = new Gif(this, "smashmash.gif");
-  myAnimation.play();
+  //  myAnimation  = new Gif(this, "smashmash.gif");
+  //  myAnimation.play();
+  myMovie = new Movie(this, "comp1.mov");
+  myMovie.loop();
+
   color c1 = color(random(255), random(255), random(255));//first color of the gradient background
   color c2 = color(random(255), random(255), random(255));//second color of the gradient background
   grad = generateGradient(c1, c2, width, height);
@@ -310,6 +315,11 @@ PImage generateGradient(color top, color bottom, int w, int h) {
   return bg;
 }
 
+// Called every time a new frame is available to read
+void movieEvent(Movie m) {
+  m.read();
+}
+
 void livesCounter() {
   int x1 = 50;
   int x2 = 300;
@@ -419,7 +429,7 @@ void title() {
 
 void smashMashTitle() {
   if (gameTitle == false) {
-    image (myAnimation, 0, 0);
+    image (myMovie, 0, 0);
     title();
   }
 }
